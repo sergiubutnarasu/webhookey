@@ -1,0 +1,62 @@
+# Compiled source
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+*.db
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+
+# Dependencies
+node_modules/
+vendor/
+venv/
+env/
+__pycache__/
+
+# Build outputs
+dist/
+build/
+target/
+*.egg-info/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Agent Zero project files
+.a0proj/
