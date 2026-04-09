@@ -4,6 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createApiClient } from "lib/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -12,73 +16,84 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
       await createApiClient().signup(email, password, name);
       router.push("/");
     } catch (e: any) {
       setError(e.message || "Signup failed");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <main className="p-8 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium">Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e: React.ChangeEvent<{ value: string }>) =>
-              setName(e.target.value)
-            }
-            className="border p-2 w-full rounded"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e: React.ChangeEvent<{ value: string }>) =>
-              setEmail(e.target.value)
-            }
-            className="border p-2 w-full rounded"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium">Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e: React.ChangeEvent<{ value: string }>) =>
-              setPassword(e.target.value)
-            }
-            className="border p-2 w-full rounded"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded w-full"
-        >
-          Sign Up
-        </button>
-      </form>
-      <p className="mt-4 text-center">
-        Already have an account?{" "}
-        <Link href="/auth/login" className="text-blue-500">
-          Login
-        </Link>
-      </p>
+    <main className="min-h-screen flex items-center justify-center p-8">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-center">Create an account</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <p className="text-destructive text-sm mb-4 text-center">{error}</p>
+          )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e: React.ChangeEvent<{ value: string }>) =>
+                  setName(e.target.value)
+                }
+                placeholder="John Doe"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e: React.ChangeEvent<{ value: string }>) =>
+                  setEmail(e.target.value)
+                }
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e: React.ChangeEvent<{ value: string }>) =>
+                  setPassword(e.target.value)
+                }
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Creating account..." : "Create account"}
+            </Button>
+          </form>
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link href="/auth/login" className="hover:underline">
+              Sign in
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
     </main>
   );
 }
