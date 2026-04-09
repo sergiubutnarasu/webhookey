@@ -72,6 +72,7 @@ yarn build
 | `webhookey login` | Authenticate via device flow |
 | `webhookey logout` | Clear stored credentials |
 | `webhookey new <name>` | Create a new channel |
+| `webhookey remove <name>` | Remove a channel |
 | `webhookey ls` | List your channels |
 | `webhookey whoami` | Show current user |
 | `webhookey listen <name> -- <cmd>` | Listen for webhooks and execute commands |
