@@ -1,0 +1,25 @@
+{
+  "name": "webhookey",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Self-hosted webhook proxy with SSE streaming",
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "yarn@4.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "reflect-metadata": "^0.2.2",
+    "turbo": "^2.0.0"
+  }
+}
