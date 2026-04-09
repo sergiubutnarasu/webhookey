@@ -31,7 +31,9 @@ async function bootstrap() {
     const method = req.method.toUpperCase()
     const isStateChanging = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)
     const isWebhook = /^\/hooks\/[^/]+([?#].*)?$/.test(req.url || '')
-    const isDeviceFlow = req.url?.startsWith('/auth/token') || req.url?.startsWith('/auth/device') // device flow — no browser origin
+    // device flow and token refresh don't originate from a browser — the refresh token
+    // is a cryptographically random secret so possessing it is proof of legitimacy
+    const isDeviceFlow = req.url?.startsWith('/auth/token') || req.url?.startsWith('/auth/device') || req.url?.startsWith('/auth/refresh')
 
     const isBearerAuth = /^Bearer\s+\S/i.test(req.headers['authorization'] || '')
 
