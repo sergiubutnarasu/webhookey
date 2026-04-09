@@ -6,7 +6,7 @@ A self-hosted webhook proxy with SSE streaming, HMAC verification, OAuth 2.0 Dev
 
 ### Prerequisites
 
-- Node.js >= 18
+- Node.js >=22
 - Docker and Docker Compose
 - Yarn 4
 
