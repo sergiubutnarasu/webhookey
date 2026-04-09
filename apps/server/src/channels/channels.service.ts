@@ -3,17 +3,9 @@ import { PrismaService } from '../prisma/prisma.service'
 import { EncryptionService } from '../encryption/encryption.service'
 import { CRYPTO_SERVICE_TOKEN } from '../crypto/crypto.tokens'
 import { ICryptoService } from '@webhookey/crypto'
+import { CreateChannelDto, UpdateChannelDto } from './dto/channels.dto'
 
-export interface CreateChannelDto {
-  name: string
-  generateSecret?: boolean
-  retentionDays?: number | null
-}
-
-export interface UpdateChannelDto {
-  name?: string
-  retentionDays?: number | null
-}
+export { CreateChannelDto, UpdateChannelDto }
 
 @Injectable()
 export class ChannelsService {

@@ -1,36 +1,27 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { createApiClient } from "lib/api";
 
 export default function SignupPage() {
-  const router = useRouter()
+  const router = useRouter();
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
-  const [error, setError] = useState('')
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError("");
 
     try {
-      const res = await fetch('/api/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name }),
-      })
-
-      if (res.ok) {
-        router.push('/')
-      } else {
-        const data = await res.json()
-        setError(data.error || 'Signup failed')
-      }
-    } catch (e) {
-      setError('An error occurred')
+      await createApiClient().signup(email, password, name);
+      router.push("/");
+    } catch (e: any) {
+      setError(e.message || "Signup failed");
     }
   }
 
@@ -44,7 +35,9 @@ export default function SignupPage() {
           <input
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e: React.ChangeEvent<{ value: string }>) =>
+              setName(e.target.value)
+            }
             className="border p-2 w-full rounded"
             required
           />
@@ -54,7 +47,9 @@ export default function SignupPage() {
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e: React.ChangeEvent<{ value: string }>) =>
+              setEmail(e.target.value)
+            }
             className="border p-2 w-full rounded"
             required
           />
@@ -64,7 +59,9 @@ export default function SignupPage() {
           <input
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e: React.ChangeEvent<{ value: string }>) =>
+              setPassword(e.target.value)
+            }
             className="border p-2 w-full rounded"
             required
           />
@@ -77,11 +74,11 @@ export default function SignupPage() {
         </button>
       </form>
       <p className="mt-4 text-center">
-        Already have an account?{' '}
+        Already have an account?{" "}
         <Link href="/auth/login" className="text-blue-500">
           Login
         </Link>
       </p>
     </main>
-  )
+  );
 }

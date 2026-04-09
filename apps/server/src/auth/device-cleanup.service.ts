@@ -10,9 +10,9 @@ export class DeviceCleanupService {
 
   @Cron('0 3 * * *') // Daily at 3 AM
   async cleanup() {
-    this.logger.log('Starting device code cleanup...')
+    this.logger.log('Starting auth cleanup...')
 
-    // Delete expired and un-approved
+    // Delete expired and un-approved device codes
     const expiredResult = await this.prisma.deviceCode.deleteMany({
       where: {
         expiresAt: { lt: new Date() },
@@ -28,8 +28,13 @@ export class DeviceCleanupService {
       },
     })
 
+    // Delete expired refresh tokens
+    const expiredRefreshResult = await this.prisma.refreshToken.deleteMany({
+      where: { expiresAt: { lt: new Date() } },
+    })
+
     this.logger.log(
-      `Cleaned up ${expiredResult.count} expired and ${orphanedResult.count} orphaned device codes`,
+      `Cleaned up ${expiredResult.count} expired and ${orphanedResult.count} orphaned device codes, ${expiredRefreshResult.count} expired refresh tokens`,
     )
   }
 }

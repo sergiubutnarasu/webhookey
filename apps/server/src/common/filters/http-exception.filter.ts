@@ -20,12 +20,19 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? exceptionResponse
         : (exceptionResponse as any).message || exception.message
 
-    response.status(status).json({
+    const isProduction = process.env.NODE_ENV === 'production'
+
+    const body: Record<string, unknown> = {
       statusCode: status,
       message,
-      error: exception.name,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-    })
+    }
+
+    if (!isProduction) {
+      body.error = exception.name
+      body.timestamp = new Date().toISOString()
+      body.path = request.url
+    }
+
+    response.status(status).json(body)
   }
 }

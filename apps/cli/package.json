@@ -9,7 +9,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "lint": "eslint \"src/**/*.ts\"",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "clean": "rm -rf dist"
   },
   "dependencies": {

@@ -15,7 +15,8 @@ export class LoggingInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest()
     const method = request.method
-    const url = request.url
+    // Use route path template instead of full URL to avoid logging sensitive path param values
+    const url = request.route?.path ?? request.url
     const now = Date.now()
 
     return next.handle().pipe(

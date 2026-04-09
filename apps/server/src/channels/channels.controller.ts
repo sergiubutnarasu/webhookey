@@ -15,6 +15,7 @@ import {
 import { ChannelsService, CreateChannelDto, UpdateChannelDto } from './channels.service'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { ConfigService } from '@nestjs/config'
+import { AuthenticatedRequest } from '../common/types/authenticated-request.interface'
 
 @Controller('channels')
 @UseGuards(JwtAuthGuard)
@@ -25,7 +26,7 @@ export class ChannelsController {
   ) {}
 
   @Get()
-  async findAll(@Req() req: any) {
+  async findAll(@Req() req: AuthenticatedRequest) {
     const channels = await this.channelsService.findAll(req.user.id)
     const baseUrl = this.config.getOrThrow<string>('BASE_URL')
     return channels.map((c: any) => ({
@@ -39,7 +40,7 @@ export class ChannelsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string, @Req() req: any) {
+  async findOne(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
     const channel = await this.channelsService.findOne(req.user.id, id)
 
     if (!channel) {
@@ -59,7 +60,7 @@ export class ChannelsController {
   }
 
   @Post()
-  async create(@Body() dto: CreateChannelDto, @Req() req: any) {
+  async create(@Body() dto: CreateChannelDto, @Req() req: AuthenticatedRequest) {
     try {
       const channel = await this.channelsService.create(req.user.id, dto)
       const baseUrl = this.config.getOrThrow<string>('BASE_URL')
@@ -83,7 +84,7 @@ export class ChannelsController {
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateChannelDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     const channel = await this.channelsService.update(req.user.id, id, dto)
 
@@ -95,7 +96,7 @@ export class ChannelsController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @Req() req: any) {
+  async remove(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
     const result = await this.channelsService.remove(req.user.id, id)
 
     if (!result) {
@@ -110,13 +111,16 @@ export class ChannelsController {
     @Param('id') id: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
+    const parsedPage = Math.max(1, parseInt(page) || 1)
+    const parsedLimit = Math.min(100, Math.max(1, parseInt(limit) || 20))
+
     const result = await this.channelsService.findEvents(
       req.user.id,
       id,
-      parseInt(page) || 1,
-      parseInt(limit) || 20,
+      parsedPage,
+      parsedLimit,
     )
 
     if (!result) {

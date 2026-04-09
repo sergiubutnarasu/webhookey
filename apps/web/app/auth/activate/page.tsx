@@ -1,55 +1,42 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createApiClient } from "lib/api";
 
 export default function ActivatePage() {
-  const router = useRouter()
-  const [userCode, setUserCode] = useState('')
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
-  const [checkingSession, setCheckingSession] = useState(true)
+  const router = useRouter();
+  const [userCode, setUserCode] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [checkingSession, setCheckingSession] = useState(true);
 
-  // Check for valid session on load
   useEffect(() => {
     async function checkSession() {
       try {
-        const res = await fetch('/api/me')
-        if (!res.ok) {
-          router.push('/auth/login?returnTo=/auth/activate')
-          return
-        }
+        await createApiClient().getMe();
+        setCheckingSession(false);
       } catch (e) {
-        router.push('/auth/login?returnTo=/auth/activate')
-        return
+        router.push("/auth/login?returnTo=/auth/activate");
       }
-      setCheckingSession(false)
     }
-    checkSession()
-  }, [router])
+    checkSession();
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setSuccess('')
+    e.preventDefault();
+    setError("");
+    setSuccess("");
 
     try {
-      const res = await fetch('/api/activate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_code: userCode }),
-      })
-
-      const data = await res.json()
-
-      if (res.ok && data.approved) {
-        setSuccess('Device activated successfully!')
-        setUserCode('')
+      const data = await createApiClient().activateDevice(userCode);
+      if (data.approved) {
+        router.push("/");
       } else {
-        setError(data.error || 'Failed to activate device')
+        setError("Failed to activate device");
       }
-    } catch (e) {
-      setError('An error occurred')
+    } catch (e: any) {
+      setError(e.message || "An error occurred");
     }
   }
 
@@ -58,7 +45,7 @@ export default function ActivatePage() {
       <main className="p-8 max-w-md mx-auto">
         <p>Checking session...</p>
       </main>
-    )
+    );
   }
 
   return (
@@ -75,7 +62,9 @@ export default function ActivatePage() {
           <input
             type="text"
             value={userCode}
-            onChange={(e) => setUserCode(e.target.value.toUpperCase())}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setUserCode(e.target.value.toUpperCase())
+            }
             className="border p-2 w-full rounded font-mono"
             placeholder="XXXX-XXXX"
             required
@@ -89,5 +78,5 @@ export default function ActivatePage() {
         </button>
       </form>
     </main>
-  )
+  );
 }

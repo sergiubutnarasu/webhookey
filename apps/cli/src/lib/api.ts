@@ -54,8 +54,8 @@ async function request<T>(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${refresh}`,
         },
+        body: JSON.stringify({ refreshToken: refresh }),
       })
 
       if (refreshRes.ok) {
