@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  channels     Channel[]
+  deviceCodes  DeviceCode[]
+  refreshTokens RefreshToken[]
+}
+
+model Channel {
+  id              String         @id @default(uuid())
+  slug            String         @unique @default(uuid())
+  name            String
+  encryptedSecret String?
+  retentionDays   Int?
+  createdAt       DateTime       @default(now())
+  userId          String
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events          WebhookEvent[]
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model WebhookEvent {
+  id        String   @id @default(uuid())
+  verified  Boolean
+  status    String   // pending, delivered, failed
+  createdAt DateTime @default(now())
+  channelId String
+  channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@index([channelId, createdAt])
+}
+
+model DeviceCode {
+  id            String    @id @default(uuid())
+  deviceCode    String    @unique
+  userCode      String    @unique
+  approved      Boolean   @default(false)
+  expiresAt     DateTime
+  lastPolledAt  DateTime?
+  createdAt     DateTime  @default(now())
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

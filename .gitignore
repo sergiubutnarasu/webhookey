@@ -1,62 +1,43 @@
-# Compiled source
-*.com
-*.class
-*.dll
-*.exe
-*.o
-*.so
-
-# Packages
-*.7z
-*.dmg
-*.gz
-*.iso
-*.jar
-*.rar
-*.tar
-*.zip
-
-# Logs and databases
-*.log
-*.sql
-*.sqlite
-*.db
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-desktop.ini
-
-# IDEs and editors
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
-*.sublime-workspace
+# Agent Zero
+.a0proj/
 
 # Dependencies
 node_modules/
-vendor/
-venv/
-env/
-__pycache__/
+.pnp.cjs
+.pnp.loader.mjs
+.yarn/install-state.gz
 
 # Build outputs
 dist/
 build/
-target/
-*.egg-info/
+.next/
+out/
+.turbo/
 
-# Environment files
+# Environment
 .env
 .env.local
 .env.*.local
 
-# Agent Zero project files
-.a0proj/
+# Logs
+*.log
+logs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+
+# Docker volumes
+postgres-data/
+
+# Yarn
+.yarn/

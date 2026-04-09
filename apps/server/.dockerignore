@@ -1,0 +1,7 @@
+.a0proj/
+node_modules/
+.env
+.env.local
+dist/
+.turbo/
+*.log
