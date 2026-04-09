@@ -138,8 +138,8 @@ export class AuthController {
       await this.authService.logout(token)
     }
 
-    res.clearCookie('access_token')
-    res.clearCookie('refresh_token', { path: '/auth' })
+    res.clearCookie('access_token', { path: '/', sameSite: 'strict' })
+    res.clearCookie('refresh_token', { path: '/', sameSite: 'strict' })
     return { success: true }
   }
 
@@ -173,19 +173,20 @@ export class AuthController {
       this.config.getOrThrow<string>('REFRESH_TOKEN_EXPIRES_IN').replace('d', ''),
     )
     const refreshMaxAge = refreshDays * 24 * 60 * 60 * 1000
+    const secure = this.config.getOrThrow<string>('WEB_ORIGIN').startsWith('https')
 
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
-      secure: true,
+      secure,
       sameSite: 'strict',
       path: '/',
       maxAge: accessMaxAge,
     })
     res.cookie('refresh_token', tokens.refresh_token, {
       httpOnly: true,
-      secure: true,
+      secure,
       sameSite: 'strict',
-      path: '/auth',
+      path: '/',
       maxAge: refreshMaxAge,
     })
   }

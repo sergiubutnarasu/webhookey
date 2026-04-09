@@ -11,7 +11,7 @@ export default async function Home() {
     redirect('/auth/login')
   }
 
-  const api = createApiClient(token)
+  const api = createApiClient(token, cookieStore.get('refresh_token')?.value)
   const channels = await api.getChannels()
 
   return (

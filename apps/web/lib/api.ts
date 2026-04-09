@@ -31,17 +31,19 @@ export interface ApiClient {
   getMe(): Promise<{ id: string; email: string; name: string }>;
 }
 
-export function createApiClient(token?: string): ApiClient {
-  const fetchJson = async <T = unknown>(path: string, options: RequestInit = {}): Promise<T> => {
+export function createApiClient(token?: string, refreshToken?: string): ApiClient {
+  let accessToken = token;
+
+  const doFetch = async (path: string, options: RequestInit = {}): Promise<Response> => {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
 
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
+    if (accessToken) {
+      headers["Authorization"] = `Bearer ${accessToken}`;
     }
 
-    const res = await fetch(`${API_URL}${path}`, {
+    return fetch(`${API_URL}${path}`, {
       ...options,
       headers: {
         ...headers,
@@ -49,6 +51,38 @@ export function createApiClient(token?: string): ApiClient {
       },
       credentials: "include",
     });
+  };
+
+  const fetchJson = async <T = unknown>(path: string, options: RequestInit = {}): Promise<T> => {
+    let res = await doFetch(path, options);
+
+    if (res.status === 401) {
+      let refreshRes: Response | null = null;
+
+      if (typeof window !== "undefined") {
+        // Client-side: use cookies
+        refreshRes = await fetch(`${API_URL}/auth/refresh`, {
+          method: "POST",
+          credentials: "include",
+        });
+      } else if (refreshToken) {
+        // SSR: use refresh token from body
+        refreshRes = await fetch(`${API_URL}/auth/refresh`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken }),
+        });
+      }
+
+      if (refreshRes?.ok) {
+        const tokens = await refreshRes.json() as { access_token: string };
+        accessToken = tokens.access_token;
+        res = await doFetch(path, options);
+      } else if (typeof window !== "undefined") {
+        window.location.href = "/auth/login";
+        throw new Error("Session expired");
+      }
+    }
 
     if (!res.ok) {
       const error: any = await res
