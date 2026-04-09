@@ -66,11 +66,18 @@ export default class Listen extends Command {
     const queue: Array<unknown> = []
     let currentProcess: ReturnType<typeof spawn> | null = null
     const maxQueueDepth = 10
+    let reconnectAttempts = 0
+    const maxReconnectAttempts = 10
+    const baseReconnectDelay = 1000
 
     const connect = () => {
       eventSource = new EventSource(`${apiUrl}/hooks/${channel.slug}/events`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
+
+      eventSource.onopen = () => {
+        reconnectAttempts = 0
+      }
 
       eventSource.onmessage = (event: { data: string }) => {
         const data = JSON.parse(event.data) as WebhookEvent
@@ -95,36 +102,55 @@ export default class Listen extends Command {
         processQueue()
       }
 
-      eventSource.onerror = async (_err: unknown) => {
-        // Handle 401 - refresh and reconnect
-        const refresh = await getRefreshToken()
-        if (refresh) {
-          try {
-            const res = await fetch(`${apiUrl}/auth/refresh`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ refreshToken: refresh }),
-            })
+      eventSource.onerror = async (err: unknown) => {
+        const status = (err as { status?: number })?.status
 
-            if (res.ok) {
-              const tokens = await res.json() as TokenResponse
-              await setAccessToken(tokens.access_token)
-              await setRefreshToken(tokens.refresh_token)
-              accessToken = tokens.access_token
+        // Only attempt token refresh on 401
+        if (status === 401) {
+          const refresh = await getRefreshToken()
+          if (refresh) {
+            try {
+              const res = await fetch(`${apiUrl}/auth/refresh`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refreshToken: refresh }),
+              })
 
-              // Close old connection and reconnect
-              eventSource?.close()
-              connect()
-              return
+              if (res.ok) {
+                const tokens = await res.json() as TokenResponse
+                await setAccessToken(tokens.access_token)
+                await setRefreshToken(tokens.refresh_token)
+                accessToken = tokens.access_token
+
+                eventSource?.close()
+                reconnectAttempts = 0
+                connect()
+                return
+              }
+            } catch {
+              // Refresh failed, fall through
             }
-          } catch (e) {
-            // Refresh failed, fall through to clear tokens
           }
+
+          await clearTokens()
+          this.error('Session expired — run webhookey login')
+          process.exit(1)
+          return
         }
 
-        await clearTokens()
-        this.error('Session expired — run webhookey login')
-        process.exit(1)
+        // Transient error (connection reset, server restart, network issue)
+        eventSource?.close()
+
+        if (reconnectAttempts >= maxReconnectAttempts) {
+          this.error('Lost connection to server after multiple retries')
+          process.exit(1)
+          return
+        }
+
+        const delay = Math.min(baseReconnectDelay * 2 ** reconnectAttempts, 60000)
+        reconnectAttempts++
+        this.warn(`Connection lost, reconnecting in ${Math.round(delay / 1000)}s (attempt ${reconnectAttempts}/${maxReconnectAttempts})...`)
+        setTimeout(connect, delay)
       }
     }
 

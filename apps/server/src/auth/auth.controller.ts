@@ -138,8 +138,8 @@ export class AuthController {
       await this.authService.logout(token)
     }
 
-    res.clearCookie('access_token')
-    res.clearCookie('refresh_token')
+    res.clearCookie('access_token', { path: '/', sameSite: 'strict' })
+    res.clearCookie('refresh_token', { path: '/', sameSite: 'strict' })
     return { success: true }
   }
 

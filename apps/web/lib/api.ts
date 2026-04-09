@@ -32,7 +32,7 @@ export interface ApiClient {
 }
 
 export function createApiClient(token?: string): ApiClient {
-  const fetchJson = async <T = unknown>(path: string, options: RequestInit = {}): Promise<T> => {
+  const doFetch = async (path: string, options: RequestInit = {}): Promise<Response> => {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
@@ -41,7 +41,7 @@ export function createApiClient(token?: string): ApiClient {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const res = await fetch(`${API_URL}${path}`, {
+    return fetch(`${API_URL}${path}`, {
       ...options,
       headers: {
         ...headers,
@@ -49,6 +49,25 @@ export function createApiClient(token?: string): ApiClient {
       },
       credentials: "include",
     });
+  };
+
+  const fetchJson = async <T = unknown>(path: string, options: RequestInit = {}): Promise<T> => {
+    let res = await doFetch(path, options);
+
+    // Client-side 401: try refresh then retry (server-side uses token so won't hit this)
+    if (res.status === 401 && !token && typeof window !== "undefined") {
+      const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (refreshRes.ok) {
+        res = await doFetch(path, options);
+      } else {
+        window.location.href = "/auth/login";
+        throw new Error("Session expired");
+      }
+    }
 
     if (!res.ok) {
       const error: any = await res
