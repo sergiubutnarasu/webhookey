@@ -12,7 +12,8 @@
     "test": "vitest run --passWithNoTests",
     "clean": "rm -rf dist"
   },
-  "dependencies": {
+"dependencies": {
+    "@inquirer/prompts": "^5.0.0",
     "@napi-rs/keyring": "^1.0.0",
     "@oclif/core": "^3.0.0",
     "@webhookey/types": "workspace:*",
