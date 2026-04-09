@@ -53,6 +53,11 @@ export class HooksController {
       return
     }
 
+    if (result.rejected) {
+      res.status(403).json({ error: 'Signature verification failed' })
+      return
+    }
+
     res.json({ received: true })
   }
 
@@ -74,6 +79,6 @@ export class HooksController {
       throw new ForbiddenException('Access denied')
     }
 
-    return this.hooksGateway.subscribe(slug)
+    return this.hooksGateway.subscribe(slug, req.user.id)
   }
 }

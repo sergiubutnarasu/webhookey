@@ -24,9 +24,9 @@ model Channel {
   id              String         @id @default(uuid())
   slug            String         @unique @default(uuid())
   name            String
-  encryptedSecret String?
-  retentionDays   Int?
-  createdAt       DateTime       @default(now())
+  encryptedSecret  String?
+  retentionDays    Int?
+  createdAt        DateTime       @default(now())
   userId          String
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   events          WebhookEvent[]

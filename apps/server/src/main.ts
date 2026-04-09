@@ -26,11 +26,17 @@ async function bootstrap() {
     const method = req.method.toUpperCase()
     const isStateChanging = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)
     const isWebhook = /^\/hooks\/[^/]+([?#].*)?$/.test(req.url || '')
-    const isAuthToken = req.url?.startsWith('/auth/token') // device flow polling — no browser origin
+    const isDeviceFlow = req.url?.startsWith('/auth/token') || req.url?.startsWith('/auth/device') // device flow — no browser origin
 
-    if (isStateChanging && !isWebhook && !isAuthToken) {
-      const origin = req.headers['origin'] || req.headers['referer']
-      if (origin && !origin.startsWith(webOrigin)) {
+    if (isStateChanging && !isWebhook && !isDeviceFlow) {
+      const origin = req.headers['origin'] as string | undefined
+      const referer = req.headers['referer'] as string | undefined
+      const matchesOrigin = (value: string) =>
+        value === webOrigin || value.startsWith(webOrigin + '/')
+      const allowed =
+        (origin && matchesOrigin(origin)) ||
+        (!origin && referer && matchesOrigin(referer))
+      if (!allowed) {
         res.status(403).json({ message: 'Forbidden' })
         return
       }

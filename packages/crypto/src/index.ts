@@ -17,12 +17,10 @@ export function verifyHmac(
 ): boolean {
   const expected = createHmac('sha256', secret).update(payload).digest('hex')
   const expectedBuf = Buffer.from(`sha256=${expected}`)
-  const signatureBuf = Buffer.from(signature)
-  
-  if (expectedBuf.length !== signatureBuf.length) {
-    return false
-  }
-  
+  // Pad or truncate signatureBuf to expectedBuf.length so timingSafeEqual
+  // never short-circuits on a length mismatch — avoids the 1-bit timing leak.
+  const signatureBuf = Buffer.alloc(expectedBuf.length)
+  Buffer.from(signature).copy(signatureBuf, 0, 0, expectedBuf.length)
   return timingSafeEqual(expectedBuf, signatureBuf)
 }
 

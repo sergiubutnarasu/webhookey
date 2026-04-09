@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcrypt'
+import { createHash } from 'crypto'
 import { PrismaService } from '../prisma/prisma.service'
 import { CRYPTO_SERVICE_TOKEN } from '../crypto/crypto.tokens'
 import { ICryptoService } from '@webhookey/crypto'
@@ -165,8 +166,9 @@ export class AuthService {
   async refreshToken(
     token: string,
   ): Promise<{ access_token: string; refresh_token: string } | null> {
+    const tokenHash = createHash('sha256').update(token).digest('hex')
     const record = await this.prisma.refreshToken.findUnique({
-      where: { token },
+      where: { token: tokenHash },
     })
 
     if (!record || record.expiresAt < new Date()) {
@@ -174,7 +176,7 @@ export class AuthService {
     }
 
     // Delete old token
-    await this.prisma.refreshToken.delete({ where: { token } })
+    await this.prisma.refreshToken.delete({ where: { token: tokenHash } })
 
     // Get user
     const user = await this.prisma.user.findUnique({
@@ -189,8 +191,9 @@ export class AuthService {
   }
 
   async logout(token: string): Promise<void> {
+    const tokenHash = createHash('sha256').update(token).digest('hex')
     await this.prisma.refreshToken
-      .delete({ where: { token } })
+      .delete({ where: { token: tokenHash } })
       .catch(() => {})
   }
 
@@ -207,6 +210,7 @@ export class AuthService {
   ): Promise<{ access_token: string; refresh_token: string }> {
     const accessToken = this.jwt.sign({ sub: userId, email })
     const refreshToken = this.crypto.generateSecret()
+    const tokenHash = createHash('sha256').update(refreshToken).digest('hex')
 
     const refreshExpiresIn = parseInt(
       this.config.getOrThrow<string>('REFRESH_TOKEN_EXPIRES_IN').replace('d', ''),
@@ -214,7 +218,7 @@ export class AuthService {
 
     await this.prisma.refreshToken.create({
       data: {
-        token: refreshToken,
+        token: tokenHash,
         userId,
         expiresAt: new Date(Date.now() + refreshExpiresIn * 24 * 60 * 60 * 1000),
       },

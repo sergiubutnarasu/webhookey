@@ -102,10 +102,8 @@ export default class Listen extends Command {
           try {
             const res = await fetch(`${apiUrl}/auth/refresh`, {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${refresh}`,
-              },
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ refreshToken: refresh }),
             })
 
             if (res.ok) {

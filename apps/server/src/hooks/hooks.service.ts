@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common'
+import { Injectable, Inject, Logger } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { EncryptionService } from '../encryption/encryption.service'
 import { HooksGateway } from './hooks.gateway'
@@ -7,6 +7,8 @@ import { ICryptoService } from '@webhookey/crypto'
 
 @Injectable()
 export class HooksService {
+  private readonly logger = new Logger(HooksService.name)
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly encryption: EncryptionService,
@@ -19,7 +21,7 @@ export class HooksService {
     slug: string,
     rawBody: Buffer,
     signature?: string,
-  ): Promise<{ received: boolean; verified: boolean }> {
+  ): Promise<{ received: boolean; verified: boolean; rejected?: boolean }> {
     const channel = await this.prisma.channel.findUnique({
       where: { slug },
     })
@@ -31,14 +33,20 @@ export class HooksService {
     let verified = false
 
     if (channel.encryptedSecret) {
-      if (signature) {
-        const secret = this.encryption.decrypt(channel.encryptedSecret)
-        // Support both X-Webhookey-Signature and X-Hub-Signature-256
-        const sig = signature.startsWith('sha256=') ? signature : `sha256=${signature}`
-        verified = this.crypto.verifyHmac(rawBody, secret, sig)
+      if (!signature) {
+        this.logger.warn(`Channel ${slug}: webhook rejected — signature required but missing`)
+        return { received: true, verified: false, rejected: true }
+      }
+      const secret = this.encryption.decrypt(channel.encryptedSecret)
+      // Support both X-Webhookey-Signature and X-Hub-Signature-256
+      const sig = signature.startsWith('sha256=') ? signature : `sha256=${signature}`
+      verified = this.crypto.verifyHmac(rawBody, secret, sig)
+      if (!verified) {
+        this.logger.warn(`Channel ${slug}: webhook rejected — signature verification failed`)
+        return { received: true, verified: false, rejected: true }
       }
     }
-    // No secret configured - verified remains false
+    // No secret configured — accepted as unverified
 
     // Parse payload for SSE emission
     let payload: unknown

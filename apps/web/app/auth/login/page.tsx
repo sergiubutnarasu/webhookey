@@ -8,7 +8,9 @@ import { createApiClient } from "lib/api";
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const returnTo = searchParams.get("returnTo") || "/";
+  const raw = searchParams.get("returnTo") || "/";
+  // Restrict to relative paths only — reject protocol-relative and absolute URLs
+  const returnTo = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

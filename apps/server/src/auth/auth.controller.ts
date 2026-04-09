@@ -10,17 +10,22 @@ import {
   HttpStatus,
 } from '@nestjs/common'
 import { Response, Request } from 'express'
-import { Throttle, ThrottlerGuard, SkipThrottle } from '@nestjs/throttler'
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler'
+import { ConfigService } from '@nestjs/config'
 import { AuthService } from './auth.service'
 import { JwtAuthGuard } from './jwt-auth.guard'
 import { SignupDto } from './dto/signup.dto'
 import { LoginDto } from './dto/login.dto'
+import { ActivateDto } from './dto/activate.dto'
 import { AuthenticatedRequest } from '../common/types/authenticated-request.interface'
 
 @Controller('auth')
 @UseGuards(ThrottlerGuard)
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly config: ConfigService,
+  ) {}
 
   @Post('device')
   @Throttle({ device: {} })
@@ -30,7 +35,7 @@ export class AuthController {
   }
 
   @Post('token')
-  @SkipThrottle()
+  @Throttle({ token: {} })
   @HttpCode(HttpStatus.OK)
   async token(@Body('device_code') deviceCode: string) {
     const result = await this.authService.pollToken(deviceCode)
@@ -46,12 +51,13 @@ export class AuthController {
   }
 
   @Post('activate')
+  @Throttle({ login: {} })
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async activate(@Body('user_code') userCode: string, @Req() req: AuthenticatedRequest) {
+  async activate(@Body() dto: ActivateDto, @Req() req: AuthenticatedRequest) {
     const approved = await this.authService.approveDeviceCode(
       req.user.id,
-      userCode,
+      dto.user_code,
     )
     return { approved }
   }
@@ -94,14 +100,14 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @Throttle({ login: {} })
   @HttpCode(HttpStatus.OK)
   async refresh(
     @Req() req: Request,
     @Body('refreshToken') bodyToken: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const token =
-      bodyToken || req.cookies?.refresh_token || req.headers.authorization?.replace('Bearer ', '')
+    const token = bodyToken || req.cookies?.refresh_token
 
     if (!token) {
       res.status(401).json({ error: 'No refresh token provided' })
@@ -133,7 +139,7 @@ export class AuthController {
     }
 
     res.clearCookie('access_token')
-    res.clearCookie('refresh_token')
+    res.clearCookie('refresh_token', { path: '/auth' })
     return { success: true }
   }
 
@@ -143,19 +149,44 @@ export class AuthController {
     return this.authService.getMe(req.user.id)
   }
 
+  private parseDurationMs(duration: string): number {
+    const match = duration.match(/^(\d+)([smhd])$/)
+    if (!match) return 15 * 60 * 1000
+    const value = parseInt(match[1])
+    switch (match[2]) {
+      case 's': return value * 1000
+      case 'm': return value * 60 * 1000
+      case 'h': return value * 60 * 60 * 1000
+      case 'd': return value * 24 * 60 * 60 * 1000
+      default:  return 15 * 60 * 1000
+    }
+  }
+
   private setCookies(
     res: Response,
     tokens: { access_token: string; refresh_token: string },
   ) {
+    const accessMaxAge = this.parseDurationMs(
+      this.config.getOrThrow<string>('JWT_EXPIRES_IN'),
+    )
+    const refreshDays = parseInt(
+      this.config.getOrThrow<string>('REFRESH_TOKEN_EXPIRES_IN').replace('d', ''),
+    )
+    const refreshMaxAge = refreshDays * 24 * 60 * 60 * 1000
+
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
+      path: '/',
+      maxAge: accessMaxAge,
     })
     res.cookie('refresh_token', tokens.refresh_token, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
+      path: '/auth',
+      maxAge: refreshMaxAge,
     })
   }
 }

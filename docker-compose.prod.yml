@@ -1,0 +1,11 @@
+# Production overrides for docker-compose.yml.
+# Usage: docker compose -f compose.yml -f docker-compose.prod.yml up -d
+#
+# Removes all credential fallbacks so the compose command fails immediately
+# if required secrets are not set in the environment.
+services:
+  postgres:
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER must be set}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB must be set}
