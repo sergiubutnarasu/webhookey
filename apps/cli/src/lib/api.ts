@@ -110,4 +110,8 @@ export const api = {
         body: JSON.stringify({ name, generateSecret }),
       },
     ),
+  deleteChannel: (id: string) =>
+    request<{ success: boolean }>(`/channels/${id}`, {
+      method: 'DELETE',
+    }),
 }
