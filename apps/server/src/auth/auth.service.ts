@@ -175,8 +175,12 @@ export class AuthService {
       return null
     }
 
-    // Delete old token
-    await this.prisma.refreshToken.delete({ where: { token: tokenHash } })
+    // Keep old token valid for a short grace period to handle concurrent requests
+    // (e.g. rapid page refreshes before browser processes Set-Cookie)
+    await this.prisma.refreshToken.update({
+      where: { token: tokenHash },
+      data: { expiresAt: new Date(Date.now() + 60 * 1000) }, // 1 minute grace period
+    })
 
     // Get user
     const user = await this.prisma.user.findUnique({

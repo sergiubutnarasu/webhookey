@@ -14,7 +14,7 @@ export default async function ChannelPage({ params }: Props) {
     redirect('/auth/login')
   }
 
-  const api = createApiClient(token)
+  const api = createApiClient(token, cookieStore.get('refresh_token')?.value)
 
   try {
     const [channel, events] = await Promise.all([
