@@ -5,12 +5,21 @@ export const config = {
   matcher: ['/((?!auth/login|auth/signup|auth/activate|_next|favicon.ico).*)'],
 }
 
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return payload.exp * 1000 < Date.now()
+  } catch {
+    return true
+  }
+}
+
 export async function middleware(request: NextRequest) {
   const accessToken = request.cookies.get('access_token')?.value
   const refreshToken = request.cookies.get('refresh_token')?.value
 
-  // If we have an access token, let the request through
-  if (accessToken) {
+  // If we have a valid (non-expired) access token, let the request through
+  if (accessToken && !isTokenExpired(accessToken)) {
     return NextResponse.next()
   }
 
@@ -35,6 +44,11 @@ export async function middleware(request: NextRequest) {
         })
 
         return response
+      }
+
+      if (res.status === 403) {
+        const returnTo = encodeURIComponent(request.nextUrl.pathname)
+        return NextResponse.redirect(new URL(`/auth/login?returnTo=${returnTo}`, request.url))
       }
     } catch (e) {
       console.error('Refresh failed:', e)

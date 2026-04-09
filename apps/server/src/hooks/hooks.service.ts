@@ -37,10 +37,8 @@ export class HooksService {
         const sig = signature.startsWith('sha256=') ? signature : `sha256=${signature}`
         verified = this.crypto.verifyHmac(rawBody, secret, sig)
       }
-    } else {
-      // No secret configured - treat as verified
-      verified = true
     }
+    // No secret configured - verified remains false
 
     // Parse payload for SSE emission
     let payload: unknown

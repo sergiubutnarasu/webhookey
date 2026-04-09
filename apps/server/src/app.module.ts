@@ -5,6 +5,7 @@ import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { ScheduleModule } from '@nestjs/schedule'
 import { EventEmitterModule } from '@nestjs/event-emitter'
+import { ThrottlerModule } from '@nestjs/throttler'
 import * as Joi from 'joi'
 
 import { PrismaModule } from './prisma/prisma.module'
@@ -44,6 +45,12 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor'
     PassportModule.register({ defaultStrategy: 'jwt' }),
     ScheduleModule.forRoot(),
     EventEmitterModule.forRoot(),
+    ThrottlerModule.forRoot([
+      { name: 'device', ttl: 60000, limit: 5 },
+      { name: 'token', ttl: 60000, limit: 60 },
+      { name: 'login', ttl: 60000, limit: 10 },
+      { name: 'signup', ttl: 60000, limit: 10 },
+    ]),
     PrismaModule,
     CryptoModule,
     EncryptionModule,
@@ -55,7 +62,11 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor'
   providers: [
     {
       provide: APP_PIPE,
-      useClass: ValidationPipe,
+      useValue: new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
     },
     {
       provide: APP_INTERCEPTOR,

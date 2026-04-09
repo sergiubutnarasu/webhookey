@@ -1,11 +1,27 @@
 {
   "extends": "@webhookey/config/tsconfig.base.json",
   "compilerOptions": {
+    "lib": ["ES2022", "dom"],
     "jsx": "preserve",
     "noEmit": true,
     "incremental": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "allowJs": true,
+    "isolatedModules": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", ".next"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next"
+  ]
 }

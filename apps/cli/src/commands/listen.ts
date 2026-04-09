@@ -24,14 +24,15 @@ export default class Listen extends Command {
 
   static flags = {
     parallel: Flags.boolean({ description: 'Allow parallel command execution' }),
+    'allow-unverified': Flags.boolean({ description: 'Execute commands even for unverified webhooks' }),
   }
 
   static strict = false
 
   async run(): Promise<void> {
-    const { args, flags, argv } = await this.parse(Listen)
-    const commandStart = argv.indexOf('--')
-    const command = commandStart >= 0 ? argv.slice(commandStart + 1) : []
+    const { args, flags } = await this.parse(Listen)
+    const commandStart = process.argv.indexOf('--')
+    const command = commandStart >= 0 ? process.argv.slice(commandStart + 1) : []
 
     if (command.length === 0) {
       this.error('No command specified. Usage: webhookey listen <name> -- <command>')
@@ -79,8 +80,10 @@ export default class Listen extends Command {
         }
 
         if (!data.verified) {
-          this.error('Received unverified webhook, skipping execution')
-          return
+          if (!flags['allow-unverified']) {
+            this.warn('Received unverified webhook, skipping execution')
+            return
+          }
         }
 
         if (queue.length >= maxQueueDepth) {

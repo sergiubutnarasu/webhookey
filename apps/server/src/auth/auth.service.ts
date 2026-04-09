@@ -61,23 +61,22 @@ export class AuthService {
       return { error: 'invalid_grant' }
     }
 
-    // Update lastPolledAt
-    await this.prisma.deviceCode.update({
-      where: { deviceCode },
-      data: { lastPolledAt: new Date() },
-    })
-
     if (record.expiresAt < new Date()) {
       return { error: 'expired_token' }
     }
 
-    // Check slow_down
+    // Check slow_down before updating lastPolledAt
     if (
       record.lastPolledAt &&
       Date.now() - record.lastPolledAt.getTime() < 5000
     ) {
       return { error: 'slow_down' }
     }
+
+    await this.prisma.deviceCode.update({
+      where: { deviceCode },
+      data: { lastPolledAt: new Date() },
+    })
 
     if (!record.approved) {
       return { error: 'authorization_pending' }

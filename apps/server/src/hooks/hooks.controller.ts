@@ -11,13 +11,14 @@ import {
   HttpStatus,
   Sse,
 } from '@nestjs/common'
-import { Response } from 'express'
+import { Response, Request } from 'express'
 import { Observable } from 'rxjs'
 import { MessageEvent } from '@nestjs/common'
 import { HooksService } from './hooks.service'
 import { HooksGateway } from './hooks.gateway'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { PrismaService } from '../prisma/prisma.service'
+import { AuthenticatedRequest } from '../common/types/authenticated-request.interface'
 
 @Controller('hooks')
 export class HooksController {
@@ -31,10 +32,10 @@ export class HooksController {
   @HttpCode(HttpStatus.OK)
   async receiveWebhook(
     @Param('slug') slug: string,
-    @Req() req: any,
+    @Req() req: Request & { rawBody?: Buffer },
     @Res() res: Response,
   ) {
-    const rawBody = req.rawBody as Buffer
+    const rawBody = req.rawBody
     if (!rawBody) {
       res.status(400).json({ error: 'Missing body' })
       return
@@ -59,7 +60,7 @@ export class HooksController {
   @UseGuards(JwtAuthGuard)
   async subscribeToEvents(
     @Param('slug') slug: string,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ): Promise<Observable<MessageEvent>> {
     const channel = await this.prisma.channel.findUnique({
       where: { slug },
