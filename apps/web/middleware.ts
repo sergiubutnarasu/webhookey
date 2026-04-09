@@ -35,11 +35,35 @@ export async function middleware(request: NextRequest) {
       })
 
       if (res.ok) {
-        const response = NextResponse.next()
-        const setCookie = res.headers.getSetCookie()
+        const setCookies = res.headers.getSetCookie()
 
-        // Forward cookies from refresh response
-        setCookie.forEach((cookie) => {
+        // Extract new access_token so server components see it in this request
+        let newAccessToken: string | null = null
+        for (const cookie of setCookies) {
+          const match = cookie.match(/^access_token=([^;]+)/)
+          if (match) {
+            newAccessToken = match[1]
+            break
+          }
+        }
+
+        // Update the incoming request's Cookie header so cookies() in server
+        // components returns the refreshed token, not the stale expired one
+        const requestHeaders = new Headers(request.headers)
+        if (newAccessToken) {
+          const existing = requestHeaders.get('cookie') ?? ''
+          const updated = existing
+            .split('; ')
+            .filter((c) => !c.startsWith('access_token='))
+            .concat(`access_token=${newAccessToken}`)
+            .join('; ')
+          requestHeaders.set('cookie', updated)
+        }
+
+        const response = NextResponse.next({ request: { headers: requestHeaders } })
+
+        // Forward Set-Cookie to the browser so future requests use the new token
+        setCookies.forEach((cookie) => {
           response.headers.append('Set-Cookie', cookie)
         })
 

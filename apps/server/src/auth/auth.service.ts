@@ -25,7 +25,7 @@ export class AuthService {
   }> {
     const deviceCode = this.crypto.generateDeviceCode()
     const userCode = this.crypto.generateUserCode()
-    const baseUrl = this.config.getOrThrow<string>('BASE_URL')
+    const webOrigin = this.config.getOrThrow<string>('WEB_ORIGIN')
 
     const expiresIn = 600 // 10 minutes
     const interval = 5 // 5 seconds
@@ -42,7 +42,7 @@ export class AuthService {
     return {
       device_code: deviceCode,
       user_code: userCode,
-      verification_uri: `${baseUrl}/auth/activate`,
+      verification_uri: `${webOrigin}/auth/activate`,
       expires_in: expiresIn,
       interval,
     }
