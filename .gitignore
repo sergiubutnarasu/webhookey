@@ -1,0 +1,43 @@
+# Agent Zero
+.a0proj/
+
+# Dependencies
+node_modules/
+.pnp.cjs
+.pnp.loader.mjs
+.yarn/install-state.gz
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+.turbo/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+
+# Docker volumes
+postgres-data/
+
+# Yarn
+.yarn/
