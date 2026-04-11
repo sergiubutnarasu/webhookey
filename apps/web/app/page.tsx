@@ -1,27 +1,27 @@
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { createApiClient } from '../lib/api'
-import { Button } from '@/components/ui/button'
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { createApiClient } from "../lib/api";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export default async function Home() {
-  const cookieStore = cookies()
-  const token = cookieStore.get('access_token')?.value
+  const cookieStore = cookies();
+  const token = cookieStore.get("access_token")?.value;
 
   if (!token) {
-    redirect('/auth/login')
+    redirect("/auth/login");
   }
 
-  const api = createApiClient(token, cookieStore.get('refresh_token')?.value)
-  const channels = await api.getChannels()
+  const api = createApiClient(token, cookieStore.get("refresh_token")?.value);
+  const channels = await api.getChannels();
 
   return (
     <main className="p-6 max-w-4xl mx-auto">
@@ -30,9 +30,9 @@ export default async function Home() {
           <h1 className="text-2xl font-semibold tracking-tight">Channels</h1>
           <Badge variant="secondary">{channels.length}</Badge>
         </div>
-        <Button asChild>
-          <Link href="/channels/new">New Channel</Link>
-        </Button>
+        <Link href="/channels/new" className="inline-flex">
+          <Button>New Channel</Button>
+        </Link>
       </div>
 
       <div className="space-y-4">
@@ -47,24 +47,25 @@ export default async function Home() {
           </Card>
         ) : (
           channels.map((channel) => (
-            <Card key={channel.id} className="hover:bg-accent/30 transition-pastel">
-              <CardHeader className="p-5">
-                <CardTitle className="text-lg">
-                  <Link
-                    href={`/channels/${channel.id}`}
-                    className="text-foreground hover:text-primary transition-pastel"
-                  >
+            <Link
+              key={channel.id}
+              href={`/channels/${channel.id}`}
+              className="block"
+            >
+              <Card className="hover:bg-accent/30 transition-pastel cursor-pointer">
+                <CardHeader className="p-5">
+                  <CardTitle className="text-lg text-foreground">
                     {channel.name}
-                  </Link>
-                </CardTitle>
-                <CardDescription className="font-mono text-xs">
-                  {channel.webhookUrl}
-                </CardDescription>
-              </CardHeader>
-            </Card>
+                  </CardTitle>
+                  <CardDescription className="font-mono text-xs">
+                    {channel.webhookUrl}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
           ))
         )}
       </div>
     </main>
-  )
+  );
 }
