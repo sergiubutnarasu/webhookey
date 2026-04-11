@@ -4,11 +4,11 @@ import { APP_INTERCEPTOR, APP_PIPE, APP_FILTER } from '@nestjs/core'
 import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { ScheduleModule } from '@nestjs/schedule'
-import { EventEmitterModule } from '@nestjs/event-emitter'
 import { ThrottlerModule } from '@nestjs/throttler'
 import { z } from 'zod'
 
 import { PrismaModule } from './prisma/prisma.module'
+import { RedisModule } from './redis/redis.module'
 import { CryptoModule } from './crypto/crypto.module'
 import { EncryptionModule } from './encryption/encryption.module'
 import { HealthModule } from './health/health.module'
@@ -31,6 +31,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor'
           REFRESH_TOKEN_EXPIRES_IN: z.string().min(1),
           BASE_URL: z.string().url(),
           WEB_ORIGIN: z.string().url(),
+          REDIS_URL: z.string().min(1).default('redis://localhost:6379'),
         })
         return schema.parse(config)
       },
@@ -47,7 +48,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor'
     }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     ScheduleModule.forRoot(),
-    EventEmitterModule.forRoot(),
+    RedisModule,
     ThrottlerModule.forRoot([
       { name: 'device', ttl: 60000, limit: 5 },
       { name: 'token', ttl: 60000, limit: 60 },

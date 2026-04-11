@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common'
-import { EventEmitter2 } from '@nestjs/event-emitter'
+import { Injectable, Inject, OnModuleInit } from '@nestjs/common'
 import { Observable, Subject } from 'rxjs'
 import { MessageEvent } from '@nestjs/common'
+import Redis from 'ioredis'
+import { REDIS_PUB_CLIENT, REDIS_SUB_CLIENT } from '../redis/redis.module'
 
 export interface SseMessage {
   type: string
@@ -12,12 +13,32 @@ const MAX_SUBSCRIBERS_PER_CHANNEL = 10
 const MAX_SUBSCRIBERS_PER_USER = 20
 
 @Injectable()
-export class HooksGateway {
+export class HooksGateway implements OnModuleInit {
   private subscribers: Map<string, Set<Subject<SseMessage>>> = new Map()
   private subscriberCount: Map<string, number> = new Map()
   private userConnectionCount: Map<string, number> = new Map()
 
-  constructor(private readonly eventEmitter: EventEmitter2) {}
+  constructor(
+    @Inject(REDIS_PUB_CLIENT) private readonly pubClient: Redis,
+    @Inject(REDIS_SUB_CLIENT) private readonly subClient: Redis,
+  ) {}
+
+  onModuleInit() {
+    this.subClient.on('message', (channel: string, message: string) => {
+      if (!channel.startsWith('hook:')) return
+      const slug = channel.slice(5)
+      const subs = this.subscribers.get(slug)
+      if (!subs) return
+      const data = JSON.parse(message)
+      for (const subject of subs) {
+        subject.next({ type: 'message', data })
+      }
+    })
+  }
+
+  private getChannel(slug: string): string {
+    return `hook:${slug}`
+  }
 
   subscribe(slug: string, userId: string): Observable<MessageEvent> {
     const currentCount = this.subscriberCount.get(slug) || 0
@@ -31,21 +52,17 @@ export class HooksGateway {
     }
 
     const subject = new Subject<SseMessage>()
+    const channel = this.getChannel(slug)
 
     if (!this.subscribers.has(slug)) {
       this.subscribers.set(slug, new Set())
       this.subscriberCount.set(slug, 0)
+      this.subClient.subscribe(channel)
     }
 
     this.subscribers.get(slug)!.add(subject)
     this.subscriberCount.set(slug, currentCount + 1)
     this.userConnectionCount.set(userId, userCount + 1)
-
-    const handler = (data: unknown) => {
-      subject.next({ type: 'message', data })
-    }
-
-    this.eventEmitter.on(`hook:${slug}`, handler)
 
     const heartbeat = setInterval(() => {
       subject.next({ type: 'heartbeat', data: '' })
@@ -60,13 +77,13 @@ export class HooksGateway {
 
       return () => {
         clearInterval(heartbeat)
-        this.eventEmitter.off(`hook:${slug}`, handler)
         const subs = this.subscribers.get(slug)
         if (subs) {
           subs.delete(subject)
           if (subs.size === 0) {
             this.subscribers.delete(slug)
             this.subscriberCount.delete(slug)
+            this.subClient.unsubscribe(channel)
           } else {
             this.subscriberCount.set(slug, subs.size)
           }
@@ -82,10 +99,18 @@ export class HooksGateway {
   }
 
   emit(slug: string, data: unknown): void {
-    this.eventEmitter.emit(`hook:${slug}`, data)
+    this.pubClient.publish(this.getChannel(slug), JSON.stringify(data))
   }
 
   getSubscriberCount(slug: string): number {
     return this.subscriberCount.get(slug) || 0
+  }
+
+  disconnectAll(slug: string): void {
+    const subs = this.subscribers.get(slug)
+    if (!subs) return
+    for (const subject of subs) {
+      subject.complete()
+    }
   }
 }

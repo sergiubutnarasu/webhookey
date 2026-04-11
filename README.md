@@ -92,14 +92,31 @@ In `compose.yml`:
 ## Architecture
 
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   GitHub    │────▶│   Server    │────▶│    CLI      │
-│   Stripe    │     │  (NestJS)   │     │  (oclif)   │
-└─────────────┘     └──────┬──────┘     └─────────────┘
-                            │
-                     ┌──────▼──────┐
-                     │  PostgreSQL │
-                     └─────────────┘
+Webhook POST /hooks/{slug}
+        │
+        ▼
+  HooksService
+        │
+        ▼
+pubClient.publish("hook:{slug}")
+        │
+        ▼
+    ┌─ Redis ─┐
+    │  Channel  │
+    └──────────┘
+        │
+    ┌───┴───┐
+    ▼       ▼
+ Server1  Server2  (behind load balancer)
+    │       │
+ subClient.on('message')
+    │       │
+    ▼       ▼
+ Local   Local
+ Subjects Subjects
+    │       │
+    ▼       ▼
+  SSE     SSE
 ```
 
 ## License

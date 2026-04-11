@@ -5,6 +5,7 @@ import { LockKeyhole } from "lucide-react";
 import { createApiClient } from "../../../lib/api";
 import { DeleteChannelButton } from "./DeleteChannelButton";
 import { CopyButton } from "./CopyButton";
+import { DisconnectAllButton } from "./DisconnectAllButton";
 import {
   Card,
   CardContent,
@@ -55,9 +56,24 @@ export default async function ChannelPage({ params }: Props) {
                     <LockKeyhole className="h-4 w-4 text-muted-foreground" />
                   )}
                 </CardTitle>
-                <CardDescription className="font-mono text-xs mt-2 flex items-center gap-2">
-                  {channel.webhookUrl}
-                  <CopyButton text={channel.webhookUrl} />
+                <CardDescription className="font-mono text-xs mt-2 flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    {channel.webhookUrl}
+                    <CopyButton text={channel.webhookUrl} />
+                  </div>
+
+                  <div className="flex gap-2 items-center">
+                    <Badge variant="secondary">
+                      {(channel.connectedDevices || 0) === 0
+                        ? "No devices connected"
+                        : channel.connectedDevices > 1
+                          ? `${channel.connectedDevices} devices connected`
+                          : "1 device connected"}
+                    </Badge>
+                    {(channel.connectedDevices || 0) > 0 && (
+                      <DisconnectAllButton id={channel.id} />
+                    )}
+                  </div>
                 </CardDescription>
               </div>
               <DeleteChannelButton id={channel.id} name={channel.name} />
