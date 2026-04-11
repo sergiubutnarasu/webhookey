@@ -47,9 +47,20 @@ export const createChannelSchema = z.object({
     .min(1, 'Channel name is required')
     .min(2, 'Channel name must be at least 2 characters')
     .max(100, 'Channel name must be less than 100 characters'),
+  encryptedSecret: z
+    .string()
+    .optional()
+    .nullable(),
+  retentionDays: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((val) => {
+      if (val === undefined || val === null || val === '') return true
+      const num = parseInt(val, 10)
+      return !isNaN(num) && num > 0
+    }, 'Retention days must be a positive number'),
 })
-
-export type CreateChannelFormData = z.infer<typeof createChannelSchema>
 
 // Device activation schema
 export const activateDeviceSchema = z.object({

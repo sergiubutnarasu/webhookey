@@ -36,8 +36,19 @@ export class ChannelsService {
   }
 
   async create(userId: string, dto: CreateChannelDto) {
-    const secret = dto.generateSecret !== false ? this.crypto.generateSecret() : null
-    const encryptedSecret = secret ? this.encryption.encrypt(secret) : null
+    // Determine the encrypted secret: use provided one, or generate new one
+    let encryptedSecret: string | null = dto.encryptedSecret ?? null
+    let secret: string | null = null
+
+    if (encryptedSecret) {
+      // User provided their own encrypted secret, we don't decrypt it
+      // Secret will be null since we don't know the plaintext
+      secret = null
+    } else if (dto.generateSecret !== false) {
+      // Generate a new secret
+      secret = this.crypto.generateSecret()
+      encryptedSecret = this.encryption.encrypt(secret)
+    }
 
     const channel = await this.prisma.channel.create({
       data: {

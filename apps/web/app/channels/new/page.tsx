@@ -29,12 +29,21 @@ export default function NewChannelPage() {
     resolver: zodResolver(createChannelSchema),
     defaultValues: {
       name: '',
+      encryptedSecret: '',
+      retentionDays: '',
     },
   })
 
   const onSubmit = async (data: CreateChannelFormData) => {
     try {
-      const channel = await createApiClient().createChannel(data.name)
+      const retentionDays = data.retentionDays ? parseInt(data.retentionDays, 10) : null
+      const encryptedSecret = data.encryptedSecret || null
+      const channel = await createApiClient().createChannel(
+        data.name,
+        !encryptedSecret, // generateSecret is true if no encryptedSecret provided
+        encryptedSecret,
+        retentionDays,
+      )
       router.push(`/channels/${channel.id}`)
     } catch (e: any) {
       setError('root', {
@@ -81,6 +90,42 @@ export default function NewChannelPage() {
                 <p className="text-sm text-destructive">{errors.name.message}</p>
               )}
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="retentionDays">Retention Days</Label>
+              <Input
+                id="retentionDays"
+                type="number"
+                min="1"
+                placeholder="30"
+                {...register('retentionDays')}
+                aria-invalid={errors.retentionDays ? 'true' : 'false'}
+              />
+              {errors.retentionDays && (
+                <p className="text-sm text-destructive">{errors.retentionDays.message}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Number of days to keep webhook events. Leave empty for no limit.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="encryptedSecret">Encrypted Secret (Optional)</Label>
+              <Input
+                id="encryptedSecret"
+                type="password"
+                placeholder="Your pre-encrypted secret"
+                {...register('encryptedSecret')}
+                aria-invalid={errors.encryptedSecret ? 'true' : 'false'}
+              />
+              {errors.encryptedSecret && (
+                <p className="text-sm text-destructive">{errors.encryptedSecret.message}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Your encrypted secret will not be visible or stored in plain text. Leave empty to auto-generate a new secret.
+              </p>
+            </div>
+
             <Button
               type="submit"
               className="w-full"

@@ -1,4 +1,4 @@
-import { IsString, IsBoolean, IsInt, IsOptional, Min, Max, MaxLength, MinLength } from 'class-validator'
+import { IsString, IsBoolean, IsInt, IsOptional, Min, Max, MaxLength, MinLength, IsBase64 } from 'class-validator'
 
 export class CreateChannelDto {
   @IsString()
@@ -9,6 +9,11 @@ export class CreateChannelDto {
   @IsOptional()
   @IsBoolean()
   generateSecret?: boolean
+
+  @IsOptional()
+  @IsString()
+  @IsBase64()
+  encryptedSecret?: string | null
 
   @IsOptional()
   @IsInt()
