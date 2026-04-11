@@ -3,7 +3,7 @@ export interface Channel {
   slug: string
   name: string
   webhookUrl: string
-  retentionDays: number | null
+  hasSecret: boolean
   createdAt: Date
 }
 

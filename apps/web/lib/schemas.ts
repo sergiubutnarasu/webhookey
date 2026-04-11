@@ -47,6 +47,12 @@ export const createChannelSchema = z.object({
     .min(1, 'Channel name is required')
     .min(2, 'Channel name must be at least 2 characters')
     .max(100, 'Channel name must be less than 100 characters'),
+  generateSecret: z.boolean().optional(),
+  retentionDays: z.coerce
+    .number()
+    .min(1, 'Retention days must be at least 1')
+    .max(365, 'Retention days must be at most 365')
+    .optional(),
 })
 
 export type CreateChannelFormData = z.infer<typeof createChannelSchema>

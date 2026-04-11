@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
+import { LockKeyhole } from "lucide-react";
 import { createApiClient } from "../../../lib/api";
 import { DeleteChannelButton } from "./DeleteChannelButton";
 import { CopyButton } from "./CopyButton";
@@ -48,8 +49,11 @@ export default async function ChannelPage({ params }: Props) {
           <CardHeader className="p-6">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <CardTitle className="text-2xl font-semibold tracking-tight">
+                <CardTitle className="text-2xl font-semibold tracking-tight flex items-center gap-2">
                   {channel.name}
+                  {channel.hasSecret && (
+                    <LockKeyhole className="h-4 w-4 text-muted-foreground" />
+                  )}
                 </CardTitle>
                 <CardDescription className="font-mono text-xs mt-2 flex items-center gap-2">
                   {channel.webhookUrl}

@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { LockKeyhole } from "lucide-react";
 import { createApiClient } from "../lib/api";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,8 +55,11 @@ export default async function Home() {
             >
               <Card className="hover:bg-accent/30 transition-pastel cursor-pointer">
                 <CardHeader className="p-5">
-                  <CardTitle className="text-lg text-foreground">
+                  <CardTitle className="text-lg text-foreground flex items-center gap-2">
                     {channel.name}
+                    {channel.hasSecret && (
+                      <LockKeyhole className="h-3 w-3 text-muted-foreground" />
+                    )}
                   </CardTitle>
                   <CardDescription className="font-mono text-xs">
                     {channel.webhookUrl}
