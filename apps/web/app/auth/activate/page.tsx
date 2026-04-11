@@ -50,10 +50,10 @@ export default function ActivatePage() {
 
   if (checkingSession) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-8">
+      <main className="min-h-screen flex items-center justify-center p-8 bg-white">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">Checking session...</p>
+            <p className="text-center text-[#afafaf]">Checking session...</p>
           </CardContent>
         </Card>
       </main>
@@ -61,20 +61,20 @@ export default function ActivatePage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-8">
+    <main className="min-h-screen flex items-center justify-center p-8 bg-white">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-center">Activate Device</CardTitle>
-          <CardDescription className="text-center">
+          <CardTitle className="text-center text-[#000000]">Activate Device</CardTitle>
+          <CardDescription className="text-center text-[#4b4b4b]">
             Enter the device code shown on your CLI to approve it.
           </CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
-            <p className="text-destructive text-sm mb-4 text-center">{error}</p>
+            <p className="text-sm mb-4 text-center text-[#000000]">{error}</p>
           )}
           {success && (
-            <p className="text-green-600 text-sm mb-4 text-center">{success}</p>
+            <p className="text-sm mb-4 text-center text-[#4b4b4b]">{success}</p>
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">

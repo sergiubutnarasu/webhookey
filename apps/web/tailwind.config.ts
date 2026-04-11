@@ -1,8 +1,8 @@
 import type { Config } from 'tailwindcss'
 
 /**
- * Tailwind configuration for Webhookey with minimalist pastel theme
- * Pastel palette: lavender, mint, peach, powder blue, rose
+ * Tailwind configuration for Webhookey with Uber-inspired design system
+ * Palette: Uber Black (#000000), Pure White (#ffffff), Grayscale system
  */
 const config: Config = {
   darkMode: 'class',
@@ -14,7 +14,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Pastel palette mapped to semantic colors
+        // Uber color palette
+        'uber-black': '#000000',
+        'uber-white': '#ffffff',
+        'body-gray': '#4b4b4b',
+        'muted-gray': '#afafaf',
+        'chip-gray': '#efefef',
+        'hover-gray': '#e2e2e2',
+        'hover-light': '#f3f3f3',
+        // Semantic colors mapped to CSS variables
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -48,27 +56,33 @@ const config: Config = {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
-        // Custom pastel colors for direct use
-        pastel: {
-          lavender: '#E6E6FA',
-          mint: '#F0FFF0',
-          peach: '#FFDAB9',
-          'powder-blue': '#B0E0E6',
-          rose: '#FFE4E1',
-        },
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        pill: '999px',
+        card: '8px',
+        'card-featured': '12px',
       },
       boxShadow: {
-        // Soft pastel shadows
-        'soft-sm': '0 1px 2px 0 rgb(230 230 250 / 0.1)',
-        'soft': '0 1px 3px 0 rgb(230 230 250 / 0.12), 0 1px 2px -1px rgb(230 230 250 / 0.08)',
-        'soft-md': '0 4px 6px -1px rgb(230 230 250 / 0.12), 0 2px 4px -2px rgb(230 230 250 / 0.08)',
-        'soft-lg': '0 10px 15px -3px rgb(230 230 250 / 0.12), 0 4px 6px -4px rgb(230 230 250 / 0.08)',
-        'soft-xl': '0 20px 25px -5px rgb(230 230 250 / 0.12), 0 8px 10px -6px rgb(230 230 250 / 0.08)',
+        // Uber whisper shadows
+        'card': '0 4px 16px 0 rgba(0, 0, 0, 0.12)',
+        'card-elevated': '0 4px 16px 0 rgba(0, 0, 0, 0.16)',
+        'floating': '0 2px 8px 0 rgba(0, 0, 0, 0.16)',
+        'button-pressed': 'inset 0 0 0 999px rgba(0, 0, 0, 0.08)',
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+      },
+      fontSize: {
+        'display': ['52px', { lineHeight: '1.23', fontWeight: '700' }],
+        'heading': ['36px', { lineHeight: '1.22', fontWeight: '700' }],
+        'section': ['24px', { lineHeight: '1.33', fontWeight: '700' }],
+        'card-title': ['32px', { lineHeight: '1.25', fontWeight: '700' }],
+        'ui': ['14px', { lineHeight: '1.43', fontWeight: '500' }],
+        'caption': ['14px', { lineHeight: '1.43', fontWeight: '400' }],
+        'micro': ['12px', { lineHeight: '1.67', fontWeight: '400' }],
       },
       keyframes: {
         'accordion-down': {

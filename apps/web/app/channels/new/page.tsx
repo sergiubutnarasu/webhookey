@@ -40,18 +40,18 @@ export default function NewChannelPage() {
       <div className="mb-6">
         <Link
           href="/"
-          className="text-sm text-muted-foreground hover:text-foreground transition-pastel"
+          className="text-sm text-[#4b4b4b] hover:text-[#000000] transition-uber"
         >
           ← Back to channels
         </Link>
       </div>
 
-      <Card className="shadow-soft">
+      <Card className="shadow-card">
         <CardHeader className="p-6">
-          <CardTitle className="text-xl font-semibold tracking-tight">
+          <CardTitle className="text-xl font-bold tracking-tight text-[#000000]">
             New Channel
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-[#4b4b4b]">
             Create a new webhook channel to receive events.
           </CardDescription>
         </CardHeader>
@@ -71,7 +71,7 @@ export default function NewChannelPage() {
               />
             </div>
             {error && (
-              <p className="text-sm text-destructive">{error}</p>
+              <p className="text-sm text-[#000000]">{error}</p>
             )}
             <Button
               type="submit"

@@ -34,14 +34,14 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-8">
+    <main className="min-h-screen flex items-center justify-center p-8 bg-white">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-center">Create an account</CardTitle>
+          <CardTitle className="text-center text-[#000000]">Create an account</CardTitle>
         </CardHeader>
         <CardContent>
           {error && (
-            <p className="text-destructive text-sm mb-4 text-center">{error}</p>
+            <p className="text-sm mb-4 text-center text-[#000000]">{error}</p>
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -86,9 +86,9 @@ export default function SignupPage() {
               {loading ? "Creating account..." : "Create account"}
             </Button>
           </form>
-          <p className="mt-6 text-center text-sm text-muted-foreground">
+          <p className="mt-6 text-center text-sm text-[#4b4b4b]">
             Already have an account?{" "}
-            <Link href="/auth/login" className="hover:underline">
+            <Link href="/auth/login" className="text-[#000000] underline hover:no-underline">
               Sign in
             </Link>
           </p>

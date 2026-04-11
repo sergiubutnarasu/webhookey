@@ -27,8 +27,8 @@ export default async function Home() {
     <main className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight">Channels</h1>
-          <Badge variant="secondary">{channels.length}</Badge>
+          <h1 className="text-2xl font-bold tracking-tight text-[#000000]">Channels</h1>
+          <Badge variant="default">{channels.length}</Badge>
         </div>
         <Button asChild>
           <Link href="/channels/new">New Channel</Link>
@@ -37,22 +37,22 @@ export default async function Home() {
 
       <div className="space-y-4">
         {channels.length === 0 ? (
-          <Card className="border-dashed">
+          <Card className="border-dashed border-[#afafaf]">
             <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">No channels yet.</p>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-[#4b4b4b]">No channels yet.</p>
+              <p className="text-sm text-[#afafaf] mt-1">
                 Create your first channel to receive webhooks.
               </p>
             </CardContent>
           </Card>
         ) : (
           channels.map((channel) => (
-            <Card key={channel.id} className="hover:bg-accent/30 transition-pastel">
+            <Card key={channel.id} className="hover:bg-[#f3f3f3] transition-uber cursor-pointer">
               <CardHeader className="p-5">
                 <CardTitle className="text-lg">
                   <Link
                     href={`/channels/${channel.id}`}
-                    className="text-foreground hover:text-primary transition-pastel"
+                    className="text-[#000000] hover:text-[#4b4b4b] transition-uber"
                   >
                     {channel.name}
                   </Link>
