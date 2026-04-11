@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createApiClient } from "../../../lib/api";
 import { DeleteChannelButton } from "./DeleteChannelButton";
+import { CopyButton } from "./CopyButton";
 import {
   Card,
   CardContent,
@@ -50,8 +51,9 @@ export default async function ChannelPage({ params }: Props) {
                 <CardTitle className="text-2xl font-semibold tracking-tight">
                   {channel.name}
                 </CardTitle>
-                <CardDescription className="font-mono text-xs mt-2">
+                <CardDescription className="font-mono text-xs mt-2 flex items-center gap-2">
                   {channel.webhookUrl}
+                  <CopyButton text={channel.webhookUrl} />
                 </CardDescription>
               </div>
               <DeleteChannelButton id={channel.id} name={channel.name} />
