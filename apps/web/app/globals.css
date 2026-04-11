@@ -21,9 +21,16 @@
   --color-shadow-medium: rgba(0, 0, 0, 0.16);
   --color-shadow-pressed: rgba(0, 0, 0, 0.08);
   
+  /* Success colors - for verified badges */
+  --color-success-bg: #10b981;
+  --color-success-bg-hover: #059669;
+  --color-success-border: #047857;
+  --color-success-text: #ffffff;
+  
   /* Semantic colors mapped via CSS variables */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);

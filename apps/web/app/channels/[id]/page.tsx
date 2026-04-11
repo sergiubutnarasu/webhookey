@@ -75,12 +75,8 @@ export default async function ChannelPage({ params }: Props) {
               events.data.map((event) => (
                 <Card key={event.id} className="hover:bg-accent/30 transition-pastel">
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <Badge
-                          variant={event.verified ? 'default' : 'outline'}
-                          className={event.verified ? 'bg-emerald-500/80 hover:bg-emerald-500/70' : ''}
-                        >
+                    <div className="flex items-center gap-3">
+                        <Badge variant={event.verified ? 'success' : 'outline'}>
                           {event.verified ? 'Verified' : 'Unverified'}
                         </Badge>
                         <span className="text-sm font-medium">
