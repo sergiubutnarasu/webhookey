@@ -1,26 +1,35 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { createApiClient } from "lib/api";
+import { activateDeviceSchema, type ActivateDeviceFormData } from "lib/schemas";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
-export default function ActivatePage() {
+function ActivateForm() {
   const router = useRouter();
-  const [userCode, setUserCode] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [checkingSession, setCheckingSession] = useState(true);
-  const [loading, setLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<ActivateDeviceFormData>({
+    resolver: zodResolver(activateDeviceSchema),
+    defaultValues: {
+      userCode: "",
+    },
+  });
 
   useEffect(() => {
     async function checkSession() {
       try {
         await createApiClient().getMe();
-        setCheckingSession(false);
       } catch (e) {
         router.push("/auth/login?returnTo=/auth/activate");
       }
@@ -28,37 +37,22 @@ export default function ActivatePage() {
     checkSession();
   }, [router]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
-    setLoading(true);
-
+  const onSubmit = async (data: ActivateDeviceFormData) => {
     try {
-      const data = await createApiClient().activateDevice(userCode);
-      if (data.approved) {
+      const result = await createApiClient().activateDevice(data.userCode);
+      if (result.approved) {
         router.push("/");
       } else {
-        setError("Failed to activate device");
+        setError("root", {
+          message: "Failed to activate device",
+        });
       }
     } catch (e: any) {
-      setError(e.message || "An error occurred");
-    } finally {
-      setLoading(false);
+      setError("root", {
+        message: e.message || "An error occurred",
+      });
     }
-  }
-
-  if (checkingSession) {
-    return (
-      <main className="min-h-screen flex items-center justify-center p-8">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">Checking session...</p>
-          </CardContent>
-        </Card>
-      </main>
-    );
-  }
+  };
 
   return (
     <main className="min-h-screen flex items-center justify-center p-8">
@@ -70,33 +64,45 @@ export default function ActivatePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {error && (
-            <p className="text-destructive text-sm mb-4 text-center">{error}</p>
+          {errors.root && (
+            <p className="text-destructive text-sm mb-4 text-center">
+              {errors.root.message}
+            </p>
           )}
-          {success && (
-            <p className="text-green-600 text-sm mb-4 text-center">{success}</p>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="deviceCode">Device Code</Label>
+              <Label htmlFor="userCode">Device Code</Label>
               <Input
-                id="deviceCode"
+                id="userCode"
                 type="text"
-                value={userCode}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setUserCode(e.target.value.toUpperCase())
-                }
-                className="font-mono"
                 placeholder="XXXX-XXXX"
-                required
+                className="font-mono uppercase"
+                {...register("userCode", {
+                  onChange: (e) => {
+                    const value = e.target.value.toUpperCase();
+                    e.target.value = value;
+                  },
+                })}
+                aria-invalid={errors.userCode ? "true" : "false"}
               />
+              {errors.userCode && (
+                <p className="text-destructive text-sm">{errors.userCode.message}</p>
+              )}
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Activating..." : "Activate"}
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Activating..." : "Activate"}
             </Button>
           </form>
         </CardContent>
       </Card>
     </main>
+  );
+}
+
+export default function ActivatePage() {
+  return (
+    <Suspense>
+      <ActivateForm />
+    </Suspense>
   );
 }

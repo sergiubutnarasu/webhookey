@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcryptjs'
 import { createHash } from 'crypto'
 import { PrismaService } from '../prisma/prisma.service'
 import { CRYPTO_SERVICE_TOKEN } from '../crypto/crypto.tokens'

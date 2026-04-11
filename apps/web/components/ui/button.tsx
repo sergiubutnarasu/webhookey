@@ -15,10 +15,10 @@ const buttonVariants = cva(
         link: 'text-foreground underline-offset-4 hover:underline',
       },
       size: {
-        default: 'h-10 px-5 rounded-pill',
-        sm: 'h-8 px-4 text-xs rounded-pill',
-        lg: 'h-12 px-8 text-base rounded-pill',
-        icon: 'h-10 w-10 rounded-pill',
+        default: 'h-10 px-5 rounded-full',
+        sm: 'h-8 px-4 text-xs rounded-full',
+        lg: 'h-12 px-8 text-base rounded-full',
+        icon: 'h-10 w-10 rounded-full',
       },
     },
     defaultVariants: {

@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { createApiClient } from "lib/api";
+import { signupSchema, type SignupFormData } from "lib/schemas";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,26 +14,30 @@ import { Button } from "@/components/ui/button";
 export default function SignupPage() {
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
+  });
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
+  const onSubmit = async (data: SignupFormData) => {
     try {
-      await createApiClient().signup(email, password, name);
+      await createApiClient().signup(data.email, data.password, data.name);
       router.push("/");
     } catch (e: any) {
-      setError(e.message || "Signup failed");
-    } finally {
-      setLoading(false);
+      setError("root", {
+        message: e.message || "Signup failed",
+      });
     }
-  }
+  };
 
   return (
     <main className="min-h-screen flex items-center justify-center p-8">
@@ -40,50 +46,52 @@ export default function SignupPage() {
           <CardTitle className="text-center">Create an account</CardTitle>
         </CardHeader>
         <CardContent>
-          {error && (
-            <p className="text-destructive text-sm mb-4 text-center">{error}</p>
+          {errors.root && (
+            <p className="text-destructive text-sm mb-4 text-center">
+              {errors.root.message}
+            </p>
           )}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
                 type="text"
-                value={name}
-                onChange={(e: React.ChangeEvent<{ value: string }>) =>
-                  setName(e.target.value)
-                }
                 placeholder="John Doe"
-                required
+                {...register("name")}
+                aria-invalid={errors.name ? "true" : "false"}
               />
+              {errors.name && (
+                <p className="text-destructive text-sm">{errors.name.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                value={email}
-                onChange={(e: React.ChangeEvent<{ value: string }>) =>
-                  setEmail(e.target.value)
-                }
                 placeholder="you@example.com"
-                required
+                {...register("email")}
+                aria-invalid={errors.email ? "true" : "false"}
               />
+              {errors.email && (
+                <p className="text-destructive text-sm">{errors.email.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
-                value={password}
-                onChange={(e: React.ChangeEvent<{ value: string }>) =>
-                  setPassword(e.target.value)
-                }
-                required
+                {...register("password")}
+                aria-invalid={errors.password ? "true" : "false"}
               />
+              {errors.password && (
+                <p className="text-destructive text-sm">{errors.password.message}</p>
+              )}
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account..." : "Create account"}
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Creating account..." : "Create account"}
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-muted-foreground">

@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { createApiClient } from "lib/api";
+import { loginSchema, type LoginFormData } from "lib/schemas";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,25 +19,29 @@ export function LoginForm() {
   // Restrict to relative paths only — reject protocol-relative and absolute URLs
   const returnTo = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
+  const onSubmit = async (data: LoginFormData) => {
     try {
-      await createApiClient().login(email, password);
+      await createApiClient().login(data.email, data.password);
       router.push(returnTo);
     } catch (e: any) {
-      setError(e.message || "Login failed");
-    } finally {
-      setLoading(false);
+      setError("root", {
+        message: e.message || "Login failed",
+      });
     }
-  }
+  };
 
   return (
     <main className="min-h-screen flex items-center justify-center p-8">
@@ -43,37 +50,39 @@ export function LoginForm() {
           <CardTitle className="text-center">Welcome back</CardTitle>
         </CardHeader>
         <CardContent>
-          {error && (
-            <p className="text-destructive text-sm mb-4 text-center">{error}</p>
+          {errors.root && (
+            <p className="text-destructive text-sm mb-4 text-center">
+              {errors.root.message}
+            </p>
           )}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                value={email}
-                onChange={(e: React.ChangeEvent<{ value: string }>) =>
-                  setEmail(e.target.value)
-                }
                 placeholder="you@example.com"
-                required
+                {...register("email")}
+                aria-invalid={errors.email ? "true" : "false"}
               />
+              {errors.email && (
+                <p className="text-destructive text-sm">{errors.email.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
-                value={password}
-                onChange={(e: React.ChangeEvent<{ value: string }>) =>
-                  setPassword(e.target.value)
-                }
-                required
+                {...register("password")}
+                aria-invalid={errors.password ? "true" : "false"}
               />
+              {errors.password && (
+                <p className="text-destructive text-sm">{errors.password.message}</p>
+              )}
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign in"}
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Signing in..." : "Sign in"}
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-muted-foreground">
