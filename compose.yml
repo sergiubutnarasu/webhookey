@@ -11,6 +11,17 @@ services:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ['CMD', 'pg_isready', '-U', '${POSTGRES_USER:-postgres}']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   server:
     build:
@@ -20,6 +31,8 @@ services:
       - apps/server/.env
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test:
@@ -39,8 +52,8 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+    args:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
     env_file:
       - apps/web/.env
     environment:
