@@ -16,7 +16,7 @@
     "@inquirer/prompts": "^8.4.1",
     "@napi-rs/keyring": "^1.0.0",
     "@oclif/core": "^3.0.0",
-    "@webhookey/types": "workspace:*",
+    "@webhookey/types": "*",
     "conf": "^12.0.0",
     "eventsource": "^2.0.0"
   },

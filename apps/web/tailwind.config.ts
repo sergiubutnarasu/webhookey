@@ -5,7 +5,7 @@ import type { Config } from 'tailwindcss'
  * Pastel palette: lavender, mint, peach, powder blue, rose
  */
 const config: Config = {
-  darkMode: ['class'],
+  darkMode: 'class',
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',

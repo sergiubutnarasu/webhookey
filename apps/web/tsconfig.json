@@ -2,10 +2,15 @@
   "extends": "@webhookey/config/tsconfig.base.json",
   "compilerOptions": {
     "lib": ["ES2022", "dom"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "jsx": "preserve",
     "noEmit": true,
     "incremental": true,
     "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
     "allowJs": true,
     "isolatedModules": true,
     "plugins": [
