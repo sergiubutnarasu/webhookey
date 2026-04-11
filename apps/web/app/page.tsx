@@ -58,7 +58,7 @@ export default async function Home() {
                   <CardTitle className="text-lg text-foreground flex items-center gap-2">
                     {channel.name}
                     {channel.hasSecret && (
-                      <LockKeyhole className="h-4 w-4 text-muted-foreground" />
+                      <LockKeyhole className="h-3 w-3 text-muted-foreground" />
                     )}
                   </CardTitle>
                   <CardDescription className="font-mono text-xs">
