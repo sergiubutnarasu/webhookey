@@ -55,9 +55,19 @@ export default async function ChannelPage({ params }: Props) {
                     <LockKeyhole className="h-4 w-4 text-muted-foreground" />
                   )}
                 </CardTitle>
-                <CardDescription className="font-mono text-xs mt-2 flex items-center gap-2">
-                  {channel.webhookUrl}
-                  <CopyButton text={channel.webhookUrl} />
+                <CardDescription className="font-mono text-xs mt-2 flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    {channel.webhookUrl}
+                    <CopyButton text={channel.webhookUrl} />
+                  </div>
+
+                  <Badge variant="secondary" className="self-start">
+                    {(channel.connectedDevices || 0) === 0
+                      ? "No devices connected"
+                      : channel.connectedDevices > 1
+                        ? `${channel.connectedDevices} devices connected`
+                        : "1 device connected"}
+                  </Badge>
                 </CardDescription>
               </div>
               <DeleteChannelButton id={channel.id} name={channel.name} />

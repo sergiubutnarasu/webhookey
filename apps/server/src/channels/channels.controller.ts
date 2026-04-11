@@ -16,6 +16,7 @@ import { ChannelsService, CreateChannelDto, UpdateChannelDto } from './channels.
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { ConfigService } from '@nestjs/config'
 import { AuthenticatedRequest } from '../common/types/authenticated-request.interface'
+import { HooksGateway } from '../hooks/hooks.gateway'
 
 @Controller('channels')
 @UseGuards(JwtAuthGuard)
@@ -23,6 +24,7 @@ export class ChannelsController {
   constructor(
     private readonly channelsService: ChannelsService,
     private readonly config: ConfigService,
+    private readonly hooksGateway: HooksGateway,
   ) {}
 
   @Get()
@@ -37,6 +39,7 @@ export class ChannelsController {
       retentionDays: c.retentionDays,
       hasSecret: !!c.encryptedSecret,
       createdAt: c.createdAt,
+      connectedDevices: this.hooksGateway.getSubscriberCount(c.slug),
     }))
   }
 
@@ -58,6 +61,7 @@ export class ChannelsController {
       retentionDays: channel.retentionDays,
       hasSecret: !!channel.encryptedSecret,
       createdAt: channel.createdAt,
+      connectedDevices: this.hooksGateway.getSubscriberCount(channel.slug),
     }
   }
 

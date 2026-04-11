@@ -5,6 +5,7 @@ export interface Channel {
   webhookUrl: string
   hasSecret: boolean
   createdAt: Date
+  connectedDevices: number
 }
 
 export interface WebhookEvent {

@@ -8,5 +8,6 @@ import { RedisModule } from '../redis/redis.module'
   imports: [EncryptionModule, RedisModule],
   providers: [HooksService, HooksGateway],
   controllers: [HooksController],
+  exports: [HooksGateway],
 })
 export class HooksModule {}
