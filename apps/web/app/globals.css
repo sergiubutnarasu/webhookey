@@ -1,0 +1,198 @@
+@import 'tailwindcss';
+
+/**
+ * Minimalist Pastel Theme for Webhookey
+ * Palette: lavender #E6E6FA, mint #F0FFF0, peach #FFDAB9, powder blue #B0E0E6, rose #FFE4E1
+ * 
+ * Tailwind v4 CSS-first configuration with pastel semantic colors
+ */
+
+@theme {
+  /* Base colors - pastel palette */
+  --color-pastel-lavender: #E6E6FA;
+  --color-pastel-mint: #F0FFF0;
+  --color-pastel-peach: #FFDAB9;
+  --color-pastel-powder-blue: #B0E0E6;
+  --color-pastel-rose: #FFE4E1;
+  
+  /* Semantic colors mapped via CSS variables */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  /* Border radius - soft rounded aesthetic */
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  
+  /* Font family */
+  --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  
+  /* Keyframes for animations */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  
+  @keyframes accordion-down {
+    from { height: 0; }
+    to { height: var(--radix-accordion-content-height); }
+  }
+  
+  @keyframes accordion-up {
+    from { height: var(--radix-accordion-content-height); }
+    to { height: 0; }
+  }
+}
+
+/* CSS Variables for light/dark mode */
+:root {
+  /* Pastel semantic color mapping using HSL values */
+  --background: hsl(210 40% 98%);
+  --foreground: hsl(215 25% 27%);
+  
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(215 25% 27%);
+  
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(215 25% 27%);
+  
+  /* Primary: Powder Blue - main action color */
+  --primary: hsl(186 52% 80%);
+  --primary-foreground: hsl(215 25% 27%);
+  
+  /* Secondary: Lavender - subdued actions */
+  --secondary: hsl(240 67% 94%);
+  --secondary-foreground: hsl(215 25% 27%);
+  
+  /* Muted: Peach - subtle backgrounds */
+  --muted: hsl(28 100% 86%);
+  --muted-foreground: hsl(215 16% 47%);
+  
+  /* Accent: Mint - highlights and success states */
+  --accent: hsl(120 100% 97%);
+  --accent-foreground: hsl(215 25% 27%);
+  
+  /* Destructive: Misty Rose - error states, soft red tone */
+  --destructive: hsl(6 100% 94%);
+  --destructive-foreground: hsl(0 84% 35%);
+  
+  /* Interface elements */
+  --border: hsl(240 33% 90%);
+  --input: hsl(240 33% 90%);
+  --ring: hsl(186 52% 70%);
+  
+  /* Border radius - soft, rounded aesthetic */
+  --radius: 0.75rem;
+}
+
+.dark {
+  /* Dark mode still maintains pastel softness */
+  --background: hsl(222 47% 11%);
+  --foreground: hsl(210 40% 96%);
+  
+  --card: hsl(217 33% 17%);
+  --card-foreground: hsl(210 40% 96%);
+  
+  --popover: hsl(217 33% 17%);
+  --popover-foreground: hsl(210 40% 96%);
+  
+  /* Darker pastel tones for dark mode */
+  --primary: hsl(186 45% 35%);
+  --primary-foreground: hsl(210 40% 96%);
+  
+  --secondary: hsl(240 20% 25%);
+  --secondary-foreground: hsl(210 40% 96%);
+  
+  --muted: hsl(217 33% 23%);
+  --muted-foreground: hsl(215 20% 65%);
+  
+  --accent: hsl(160 84% 20%);
+  --accent-foreground: hsl(210 40% 96%);
+  
+  --destructive: hsl(0 62% 30%);
+  --destructive-foreground: hsl(210 40% 96%);
+  
+  --border: hsl(217 33% 23%);
+  --input: hsl(217 33% 23%);
+  --ring: hsl(186 45% 45%);
+}
+
+/* Base styles */
+* {
+  border-color: var(--border);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'rlig' 1, 'calt' 1;
+}
+
+/* Utility classes */
+@layer utilities {
+  /* Soft pastel gradient utilities */
+  .gradient-pastel {
+    background: linear-gradient(
+      135deg,
+      var(--background) 0%,
+      color-mix(in oklch, var(--secondary) 30%, transparent) 50%,
+      color-mix(in oklch, var(--accent) 20%, transparent) 100%
+    );
+  }
+  
+  /* Soft focus ring with pastel tint */
+  .focus-pastel:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 40%, transparent);
+  }
+  
+  /* Backdrop blur for glassmorphism effects */
+  .glass-pastel {
+    background: color-mix(in oklch, var(--card) 80%, transparent);
+    backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in oklch, var(--border) 50%, transparent);
+  }
+  
+  /* Transition utilities for smooth interactions */
+  .transition-pastel {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Soft pastel shadows using lavender tint */
+  .shadow-soft-sm {
+    box-shadow: 0 1px 2px 0 rgb(230 230 250 / 0.1);
+  }
+  
+  .shadow-soft {
+    box-shadow: 0 1px 3px 0 rgb(230 230 250 / 0.12), 0 1px 2px -1px rgb(230 230 250 / 0.08);
+  }
+  
+  .shadow-soft-md {
+    box-shadow: 0 4px 6px -1px rgb(230 230 250 / 0.12), 0 2px 4px -2px rgb(230 230 250 / 0.08);
+  }
+  
+  .shadow-soft-lg {
+    box-shadow: 0 10px 15px -3px rgb(230 230 250 / 0.12), 0 4px 6px -4px rgb(230 230 250 / 0.08);
+  }
+  
+  .shadow-soft-xl {
+    box-shadow: 0 20px 25px -5px rgb(230 230 250 / 0.12), 0 8px 10px -6px rgb(230 230 250 / 0.08);
+  }
+}

@@ -1,48 +1,88 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createApiClient } from "lib/api";
+import { useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { createApiClient } from 'lib/api'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 
 export default function NewChannelPage() {
-  const router = useRouter();
-  const [name, setName] = useState("");
-  const [error, setError] = useState("");
+  const router = useRouter()
+  const [name, setName] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
+    e.preventDefault()
+    setError('')
+    setIsLoading(true)
 
     try {
-      const channel = await createApiClient().createChannel(name);
-      router.push(`/channels/${channel.id}`);
+      const channel = await createApiClient().createChannel(name)
+      router.push(`/channels/${channel.id}`)
     } catch (e: any) {
-      setError(e.message || "Failed to create channel");
+      setError(e.message || 'Failed to create channel')
+      setIsLoading(false)
     }
   }
 
   return (
-    <main className="p-8 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">New Channel</h1>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium">Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-            className="border p-2 w-full rounded"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded w-full"
+    <main className="p-6 max-w-md mx-auto">
+      <div className="mb-6">
+        <Link
+          href="/"
+          className="text-sm text-muted-foreground hover:text-foreground transition-pastel"
         >
-          Create
-        </button>
-      </form>
+          ← Back to channels
+        </Link>
+      </div>
+
+      <Card className="shadow-soft">
+        <CardHeader className="p-6">
+          <CardTitle className="text-xl font-semibold tracking-tight">
+            New Channel
+          </CardTitle>
+          <CardDescription>
+            Create a new webhook channel to receive events.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="px-6 pb-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setName(e.target.value)
+                }
+                placeholder="My Channel"
+                required
+              />
+            </div>
+            {error && (
+              <p className="text-sm text-destructive">{error}</p>
+            )}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Creating...' : 'Create Channel'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </main>
-  );
+  )
 }

@@ -3,6 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createApiClient } from "lib/api";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 export default function ActivatePage() {
   const router = useRouter();
@@ -10,6 +14,7 @@ export default function ActivatePage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [checkingSession, setCheckingSession] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function checkSession() {
@@ -27,6 +32,7 @@ export default function ActivatePage() {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setLoading(true);
 
     try {
       const data = await createApiClient().activateDevice(userCode);
@@ -37,46 +43,60 @@ export default function ActivatePage() {
       }
     } catch (e: any) {
       setError(e.message || "An error occurred");
+    } finally {
+      setLoading(false);
     }
   }
 
   if (checkingSession) {
     return (
-      <main className="p-8 max-w-md mx-auto">
-        <p>Checking session...</p>
+      <main className="min-h-screen flex items-center justify-center p-8">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <p className="text-center text-muted-foreground">Checking session...</p>
+          </CardContent>
+        </Card>
       </main>
     );
   }
 
   return (
-    <main className="p-8 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Activate Device</h1>
-      <p className="text-gray-600 mb-4">
-        Enter the device code shown on your CLI to approve it.
-      </p>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      {success && <p className="text-green-500 mb-4">{success}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium">Device Code</label>
-          <input
-            type="text"
-            value={userCode}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setUserCode(e.target.value.toUpperCase())
-            }
-            className="border p-2 w-full rounded font-mono"
-            placeholder="XXXX-XXXX"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded w-full"
-        >
-          Activate
-        </button>
-      </form>
+    <main className="min-h-screen flex items-center justify-center p-8">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-center">Activate Device</CardTitle>
+          <CardDescription className="text-center">
+            Enter the device code shown on your CLI to approve it.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <p className="text-destructive text-sm mb-4 text-center">{error}</p>
+          )}
+          {success && (
+            <p className="text-green-600 text-sm mb-4 text-center">{success}</p>
+          )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="deviceCode">Device Code</Label>
+              <Input
+                id="deviceCode"
+                type="text"
+                value={userCode}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setUserCode(e.target.value.toUpperCase())
+                }
+                className="font-mono"
+                placeholder="XXXX-XXXX"
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Activating..." : "Activate"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </main>
   );
 }
