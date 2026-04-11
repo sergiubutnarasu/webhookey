@@ -9,11 +9,11 @@ import {
   Query,
   Req,
   UseGuards,
-  NotFoundException,
   ConflictException,
 } from '@nestjs/common'
 import { ChannelsService, CreateChannelDto, UpdateChannelDto } from './channels.service'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { ChannelOwnershipGuard } from '../common/guards/channel-ownership.guard'
 import { ConfigService } from '@nestjs/config'
 import { AuthenticatedRequest } from '../common/types/authenticated-request.interface'
 import { HooksGateway } from '../hooks/hooks.gateway'
@@ -44,13 +44,9 @@ export class ChannelsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
-    const channel = await this.channelsService.findOne(req.user.id, id)
-
-    if (!channel) {
-      throw new NotFoundException('Channel not found')
-    }
-
+  @UseGuards(ChannelOwnershipGuard)
+  async findOne(@Req() req: AuthenticatedRequest) {
+    const channel = req.channel!
     const baseUrl = this.config.getOrThrow<string>('BASE_URL')
 
     return {
@@ -87,64 +83,39 @@ export class ChannelsController {
   }
 
   @Patch(':id')
+  @UseGuards(ChannelOwnershipGuard)
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateChannelDto,
-    @Req() req: AuthenticatedRequest,
   ) {
-    const channel = await this.channelsService.update(req.user.id, id, dto)
-
-    if (!channel) {
-      throw new NotFoundException('Channel not found')
-    }
-
-    return channel
+    return this.channelsService.update(id, dto)
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
-    const result = await this.channelsService.remove(req.user.id, id)
-
-    if (!result) {
-      throw new NotFoundException('Channel not found')
-    }
-
+  @UseGuards(ChannelOwnershipGuard)
+  async remove(@Param('id') id: string) {
+    await this.channelsService.remove(id)
     return { success: true }
   }
 
   @Delete(':id/connections')
-  async disconnectAll(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
-    const channel = await this.channelsService.findOne(req.user.id, id)
-
-    if (!channel) {
-      throw new NotFoundException('Channel not found')
-    }
-
+  @UseGuards(ChannelOwnershipGuard)
+  async disconnectAll(@Req() req: AuthenticatedRequest) {
+    const channel = req.channel!
     this.hooksGateway.disconnectAll(channel.slug)
     return { success: true }
   }
 
   @Get(':id/events')
+  @UseGuards(ChannelOwnershipGuard)
   async findEvents(
     @Param('id') id: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Req() req: AuthenticatedRequest,
   ) {
     const parsedPage = Math.max(1, parseInt(page) || 1)
     const parsedLimit = Math.min(100, Math.max(1, parseInt(limit) || 20))
 
-    const result = await this.channelsService.findEvents(
-      req.user.id,
-      id,
-      parsedPage,
-      parsedLimit,
-    )
-
-    if (!result) {
-      throw new NotFoundException('Channel not found')
-    }
-
-    return result
+    return this.channelsService.findEvents(id, parsedPage, parsedLimit)
   }
 }

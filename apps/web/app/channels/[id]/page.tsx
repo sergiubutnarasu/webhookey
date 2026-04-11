@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { LockKeyhole } from "lucide-react";
 import { createApiClient } from "../../../lib/api";
+import { ApiError } from "../../../lib/api-error";
 import { DeleteChannelButton } from "./DeleteChannelButton";
 import { CopyButton } from "./CopyButton";
 import { DisconnectAllButton } from "./DisconnectAllButton";
@@ -124,7 +125,10 @@ export default async function ChannelPage({ params }: Props) {
         </div>
       </main>
     );
-  } catch (e) {
+  } catch (e: any) {
+    if (e instanceof ApiError && e.statusCode === 403) {
+      redirect("/forbidden");
+    }
     notFound();
   }
 }
