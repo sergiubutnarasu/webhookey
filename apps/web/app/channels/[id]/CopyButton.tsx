@@ -27,12 +27,14 @@ export function CopyButton({ text }: CopyButtonProps) {
       size="icon"
       onClick={handleCopy}
       aria-label={copied ? 'Copied!' : 'Copy URL'}
+      className="relative"
     >
-      {copied ? (
-        <Check className="text-green-500" />
-      ) : (
-        <ClipboardCopy />
-      )}
+      <ClipboardCopy
+        className={`absolute transition-opacity duration-300 ${copied ? 'opacity-0' : 'opacity-100'}`}
+      />
+      <Check
+        className={`text-green-500 transition-opacity duration-300 ${copied ? 'opacity-100' : 'opacity-0'}`}
+      />
     </Button>
   );
 }
