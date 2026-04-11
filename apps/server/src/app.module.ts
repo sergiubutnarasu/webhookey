@@ -6,7 +6,7 @@ import { PassportModule } from '@nestjs/passport'
 import { ScheduleModule } from '@nestjs/schedule'
 import { EventEmitterModule } from '@nestjs/event-emitter'
 import { ThrottlerModule } from '@nestjs/throttler'
-import * as Joi from 'joi'
+import { z } from 'zod'
 
 import { PrismaModule } from './prisma/prisma.module'
 import { CryptoModule } from './crypto/crypto.module'
@@ -22,15 +22,18 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      validationSchema: Joi.object({
-        DATABASE_URL: Joi.string().required(),
-        MASTER_KEY: Joi.string().min(32).required(),
-        JWT_SECRET: Joi.string().min(32).required(),
-        JWT_EXPIRES_IN: Joi.string().required(),
-        REFRESH_TOKEN_EXPIRES_IN: Joi.string().required(),
-        BASE_URL: Joi.string().uri().required(),
-        WEB_ORIGIN: Joi.string().uri().required(),
-      }),
+      validate: (config) => {
+        const schema = z.object({
+          DATABASE_URL: z.string().min(1),
+          MASTER_KEY: z.string().min(32),
+          JWT_SECRET: z.string().min(32),
+          JWT_EXPIRES_IN: z.string().min(1),
+          REFRESH_TOKEN_EXPIRES_IN: z.string().min(1),
+          BASE_URL: z.string().url(),
+          WEB_ORIGIN: z.string().url(),
+        })
+        return schema.parse(config)
+      },
     }),
     JwtModule.registerAsync({
       imports: [ConfigModule],

@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { createApiClient } from 'lib/api'
+import { createChannelSchema, type CreateChannelFormData } from 'lib/schemas'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,21 +19,27 @@ import {
 
 export default function NewChannelPage() {
   const router = useRouter()
-  const [name, setName] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setIsLoading(true)
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateChannelFormData>({
+    resolver: zodResolver(createChannelSchema),
+    defaultValues: {
+      name: '',
+    },
+  })
 
+  const onSubmit = async (data: CreateChannelFormData) => {
     try {
-      const channel = await createApiClient().createChannel(name)
+      const channel = await createApiClient().createChannel(data.name)
       router.push(`/channels/${channel.id}`)
     } catch (e: any) {
-      setError(e.message || 'Failed to create channel')
-      setIsLoading(false)
+      setError('root', {
+        message: e.message || 'Failed to create channel',
+      })
     }
   }
 
@@ -56,29 +64,29 @@ export default function NewChannelPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="px-6 pb-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {errors.root && (
+            <p className="text-sm text-destructive mb-4">{errors.root.message}</p>
+          )}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
                 type="text"
-                value={name}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setName(e.target.value)
-                }
                 placeholder="My Channel"
-                required
+                {...register('name')}
+                aria-invalid={errors.name ? 'true' : 'false'}
               />
+              {errors.name && (
+                <p className="text-sm text-destructive">{errors.name.message}</p>
+              )}
             </div>
-            {error && (
-              <p className="text-sm text-destructive">{error}</p>
-            )}
             <Button
               type="submit"
               className="w-full"
-              disabled={isLoading}
+              disabled={isSubmitting}
             >
-              {isLoading ? 'Creating...' : 'Create Channel'}
+              {isSubmitting ? 'Creating...' : 'Create Channel'}
             </Button>
           </form>
         </CardContent>
