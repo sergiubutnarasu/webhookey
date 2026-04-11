@@ -91,56 +91,33 @@ In `compose.yml`:
 
 ## Architecture
 
-### Overview
-
 ```
-┌─────────────┐     ┌──────────────────────────┐     ┌─────────────┐
-│   GitHub    │     │       Server (NestJS)    │     │    CLI      │
-│   Stripe    │────▶│                          │────▶│   (oclif)   │
-│   ...       │     │  ┌──────┐  ┌───────────┐ │     └──────┬──────┘
-└─────────────┘     │  │Auth  │  │Hooks      │ │            │
-                    │  │Module│  │Gateway    │ │     SSE stream
-                    │  └──────┘  └─────┬─────┘ │            │
-                    │                    │       │     JWT auth
-                    │            ┌───────▼─────┐ │
-                    │            │Redis Pub/Sub│ │
-                    │            └───────┬─────┘ │
-                    └────────────────────┼───────┘
-                                         │
-                              ┌──────────▼──────────┐
-                              │     Redis (ioredis)  │
-                              └─────────────────────┘
-                                         │
-                    ┌────────────────────┼────────────────────┐
-                    │                    │                    │
-              ┌─────▼─────┐      ┌──────▼──────┐     ┌──────▼──────┐
-              │  Server 1  │      │  Server 2   │     │  Server N   │
-              │ (local     │      │ (local      │    │ (local      │
-              │  Subjects) │      │  Subjects)  │    │  Subjects)  │
-              └─────┬──────┘      └──────┬──────┘    └──────┬──────┘
-                    │                    │                   │
-                    ▼                    ▼                   ▼
-               SSE clients         SSE clients          SSE clients
+Webhook POST /hooks/{slug}
+        │
+        ▼
+  HooksService
+        │
+        ▼
+pubClient.publish("hook:{slug}")
+        │
+        ▼
+    ┌─ Redis ─┐
+    │  Channel  │
+    └──────────┘
+        │
+    ┌───┴───┐
+    ▼       ▼
+ Server1  Server2  (behind load balancer)
+    │       │
+ subClient.on('message')
+    │       │
+    ▼       ▼
+ Local   Local
+ Subjects Subjects
+    │       │
+    ▼       ▼
+  SSE     SSE
 ```
-
-### Webhook Flow
-
-1. External service sends `POST /hooks/{slug}` with optional HMAC signature
-2. Server verifies signature (if channel has a secret) and stores the event in PostgreSQL
-3. Server publishes the event to Redis channel `hook:{slug}` via `REDIS_PUB_CLIENT`
-4. All server instances subscribed to that channel receive the event via `REDIS_SUB_CLIENT`
-5. Each instance fans out to its local RxJS Subjects → SSE connections
-6. CLI clients receive the event in real-time through their SSE stream
-
-### Key Components
-
-| Component | Technology | Role |
-|-----------|-----------|------|
-| Server | NestJS | REST API, SSE streaming, webhook ingestion |
-| PostgreSQL | Prisma ORM | Channels, users, webhook events |
-| Redis | ioredis Pub/Sub | Cross-instance event fan-out for SSE |
-| Web | Next.js | Dashboard UI |
-| CLI | oclif | Terminal client with SSE listener |
 
 ## License
 
