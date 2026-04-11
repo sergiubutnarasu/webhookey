@@ -102,12 +102,12 @@ export const api = {
     request<Array<{ id: string; slug: string; name: string; webhookUrl: string; createdAt: string }>>(
       '/channels',
     ),
-  createChannel: (name: string, generateSecret = true) =>
+  createChannel: (name: string, generateSecret = true, retentionDays?: number) =>
     request<{ id: string; slug: string; name: string; webhookUrl: string; secret?: string }>(
       '/channels',
       {
         method: 'POST',
-        body: JSON.stringify({ name, generateSecret }),
+        body: JSON.stringify({ name, generateSecret, retentionDays }),
       },
     ),
   deleteChannel: (id: string) =>

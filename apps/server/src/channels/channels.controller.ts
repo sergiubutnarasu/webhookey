@@ -35,6 +35,7 @@ export class ChannelsController {
       name: c.name,
       webhookUrl: `${baseUrl}/hooks/${c.slug}`,
       retentionDays: c.retentionDays,
+      hasSecret: !!c.encryptedSecret,
       createdAt: c.createdAt,
     }))
   }
@@ -55,6 +56,7 @@ export class ChannelsController {
       name: channel.name,
       webhookUrl: `${baseUrl}/hooks/${channel.slug}`,
       retentionDays: channel.retentionDays,
+      hasSecret: !!channel.encryptedSecret,
       createdAt: channel.createdAt,
     }
   }

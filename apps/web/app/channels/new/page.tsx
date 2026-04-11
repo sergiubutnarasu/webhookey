@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createApiClient } from 'lib/api'
@@ -9,6 +10,7 @@ import { createChannelSchema, type CreateChannelFormData } from 'lib/schemas'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Card,
   CardContent,
@@ -16,30 +18,61 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from '@/components/ui/alert-dialog'
 
 export default function NewChannelPage() {
   const router = useRouter()
+  const [createdChannel, setCreatedChannel] = useState<(null | { id: string; secret: string; name: string })>(null)
 
   const {
     register,
     handleSubmit,
     setError,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<CreateChannelFormData>({
     resolver: zodResolver(createChannelSchema),
     defaultValues: {
       name: '',
+      generateSecret: true,
+      retentionDays: undefined,
     },
   })
 
+  const disableSecret = watch('generateSecret') === false
+
   const onSubmit = async (data: CreateChannelFormData) => {
     try {
-      const channel = await createApiClient().createChannel(data.name)
-      router.push(`/channels/${channel.id}`)
+      const channel = await createApiClient().createChannel(
+        data.name,
+        data.generateSecret ?? true,
+        data.retentionDays
+      )
+      setCreatedChannel({ id: channel.id, secret: channel.secret, name: channel.name })
     } catch (e: any) {
       setError('root', {
         message: e.message || 'Failed to create channel',
       })
+    }
+  }
+
+  const handleCloseModal = () => {
+    if (createdChannel) {
+      router.push(`/channels/${createdChannel.id}`)
+    }
+  }
+
+  const copySecret = () => {
+    if (createdChannel?.secret) {
+      navigator.clipboard.writeText(createdChannel.secret)
     }
   }
 
@@ -81,6 +114,38 @@ export default function NewChannelPage() {
                 <p className="text-sm text-destructive">{errors.name.message}</p>
               )}
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="retentionDays">Retention days (optional)</Label>
+              <Input
+                id="retentionDays"
+                type="number"
+                min={1}
+                max={365}
+                placeholder="Leave empty for no expiration"
+                {...register('retentionDays')}
+                aria-invalid={errors.retentionDays ? 'true' : 'false'}
+              />
+              {errors.retentionDays && (
+                <p className="text-sm text-destructive">{errors.retentionDays.message}</p>
+              )}
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="disableSecret"
+                checked={disableSecret}
+                onCheckedChange={(checked) => {
+                  register('generateSecret').onChange({
+                    target: { name: 'generateSecret', value: !checked },
+                  })
+                }}
+              />
+              <Label htmlFor="disableSecret" className="text-sm font-normal cursor-pointer">
+                Disable secret generation
+              </Label>
+            </div>
+
             <Button
               type="submit"
               className="w-full"
@@ -91,6 +156,30 @@ export default function NewChannelPage() {
           </form>
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!createdChannel} onOpenChange={(open) => !open && handleCloseModal()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Channel Created</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <p className="text-amber-600 font-medium">
+                Save your secret — it won't be shown again!
+              </p>
+              <div className="bg-muted p-3 rounded-md font-mono text-sm break-all">
+                {createdChannel?.secret}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <Button variant="outline" onClick={copySecret}>
+              Copy Secret
+            </Button>
+            <AlertDialogCancel asChild>
+              <Button onClick={handleCloseModal}>Continue</Button>
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   )
 }

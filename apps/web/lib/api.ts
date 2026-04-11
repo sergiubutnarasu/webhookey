@@ -11,6 +11,7 @@ export interface ApiClient {
   createChannel(
     name: string,
     generateSecret?: boolean,
+    retentionDays?: number,
   ): Promise<Channel & { secret: string }>;
   deleteChannel(id: string): Promise<void>;
   getEvents(
@@ -97,10 +98,10 @@ export function createApiClient(token?: string, refreshToken?: string): ApiClien
   return {
     getChannels: () => fetchJson<Channel[]>("/channels"),
     getChannel: (id) => fetchJson<Channel>(`/channels/${id}`),
-    createChannel: (name, generateSecret = true) =>
+    createChannel: (name, generateSecret = true, retentionDays) =>
       fetchJson<Channel & { secret: string }>("/channels", {
         method: "POST",
-        body: JSON.stringify({ name, generateSecret }),
+        body: JSON.stringify({ name, generateSecret, retentionDays }),
       }),
     deleteChannel: (id) => fetchJson<void>(`/channels/${id}`, { method: "DELETE" }),
     getEvents: (channelId, page = 1, limit = 20) =>

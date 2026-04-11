@@ -10,12 +10,13 @@ export default class New extends Command {
 
   static flags = {
     'no-secret': Flags.boolean({ description: 'Create channel without HMAC secret' }),
+    'retention-days': Flags.integer({ description: 'Number of days to retain webhook events (1-365)' }),
   }
 
   async run(): Promise<void> {
     const { args, flags } = await this.parse(New)
 
-    const channel = await api.createChannel(args.name, !flags['no-secret'])
+    const channel = await api.createChannel(args.name, !flags['no-secret'], flags['retention-days'])
 
     this.log(`Channel created: ${channel.name}`)
     this.log(`Webhook URL: ${channel.webhookUrl}`)
