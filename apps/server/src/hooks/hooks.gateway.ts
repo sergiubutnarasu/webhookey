@@ -105,4 +105,12 @@ export class HooksGateway implements OnModuleInit {
   getSubscriberCount(slug: string): number {
     return this.subscriberCount.get(slug) || 0
   }
+
+  disconnectAll(slug: string): void {
+    const subs = this.subscribers.get(slug)
+    if (!subs) return
+    for (const subject of subs) {
+      subject.complete()
+    }
+  }
 }

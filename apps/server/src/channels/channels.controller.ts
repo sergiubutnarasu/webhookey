@@ -112,6 +112,18 @@ export class ChannelsController {
     return { success: true }
   }
 
+  @Delete(':id/connections')
+  async disconnectAll(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    const channel = await this.channelsService.findOne(req.user.id, id)
+
+    if (!channel) {
+      throw new NotFoundException('Channel not found')
+    }
+
+    this.hooksGateway.disconnectAll(channel.slug)
+    return { success: true }
+  }
+
   @Get(':id/events')
   async findEvents(
     @Param('id') id: string,

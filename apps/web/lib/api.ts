@@ -14,6 +14,7 @@ export interface ApiClient {
     retentionDays?: number,
   ): Promise<Channel & { secret: string }>;
   deleteChannel(id: string): Promise<void>;
+  disconnectAll(id: string): Promise<void>;
   getEvents(
     channelId: string,
     page?: number,
@@ -104,6 +105,7 @@ export function createApiClient(token?: string, refreshToken?: string): ApiClien
         body: JSON.stringify({ name, generateSecret, retentionDays }),
       }),
     deleteChannel: (id) => fetchJson<void>(`/channels/${id}`, { method: "DELETE" }),
+    disconnectAll: (id) => fetchJson<void>(`/channels/${id}/connections`, { method: "DELETE" }),
     getEvents: (channelId, page = 1, limit = 20) =>
       fetchJson<PaginatedResponse<WebhookEvent>>(`/channels/${channelId}/events?page=${page}&limit=${limit}`),
     login: (email, password) =>
