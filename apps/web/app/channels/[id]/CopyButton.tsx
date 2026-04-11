@@ -5,6 +5,7 @@ import { ClipboardCopy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
+  TooltipArrow,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
@@ -25,7 +26,7 @@ export function CopyButton({ text }: CopyButtonProps) {
       toast({
         title: 'Copied!',
         description: 'Channel URL copied to clipboard.',
-        variant: 'success',
+        variant: 'default',
       });
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -59,6 +60,7 @@ export function CopyButton({ text }: CopyButtonProps) {
         </TooltipTrigger>
         <TooltipContent>
           <p>Copy channel URL</p>
+          <TooltipArrow className="TooltipArrow" />
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
