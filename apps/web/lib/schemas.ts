@@ -66,3 +66,23 @@ export const activateDeviceSchema = z.object({
 })
 
 export type ActivateDeviceFormData = z.infer<typeof activateDeviceSchema>
+// Update profile schema
+export const updateProfileSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Name is required')
+    .min(2, 'Name must be at least 2 characters')
+    .max(128, 'Name must be less than 128 characters'),
+})
+
+export type UpdateProfileFormData = z.infer<typeof updateProfileSchema>
+
+// Update password schema
+export const updatePasswordSchema = z.object({
+  currentPassword: z
+    .string()
+    .min(1, 'Current password is required'),
+  newPassword: createPasswordSchema(8),
+})
+
+export type UpdatePasswordFormData = z.infer<typeof updatePasswordSchema>
