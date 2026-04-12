@@ -6,5 +6,6 @@ export interface AuthenticatedRequest extends Request {
     id: string
     email: string
   }
+  // Require channel to be present if the route is decorated with @UseGuards(ChannelOwnershipGuard)
   channel?: Channel
 }
