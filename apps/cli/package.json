@@ -1,28 +1,39 @@
 {
   "name": "@webhookey/cli",
   "version": "0.0.0",
-  "private": true,
+  "description": "CLI for webhookey — self-hosted webhook proxy with SSE streaming",
+  "keywords": ["webhookey", "webhook", "proxy", "cli", "sse"],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "bin": {
     "webhookey": "./bin/run.js"
   },
+  "files": [
+    "bin",
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "vitest run --passWithNoTests",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "yarn build"
   },
   "dependencies": {
     "@inquirer/prompts": "^8.4.1",
     "@napi-rs/keyring": "^1.0.0",
     "@oclif/core": "^3.0.0",
-    "@webhookey/types": "*",
     "conf": "^12.0.0",
     "eventsource": "^2.0.0"
   },
   "devDependencies": {
     "@types/eventsource": "^1.0.0",
     "@types/node": "^20.0.0",
+    "@webhookey/types": "*",
     "typescript": "^5.0.0",
     "vitest": "^1.0.0"
   },
