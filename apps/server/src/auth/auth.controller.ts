@@ -130,9 +130,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async logout(
     @Req() req: Request,
+    @Body('refreshToken') bodyToken: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const token = (req as AuthenticatedRequest & { cookies: Record<string, string> }).cookies?.refresh_token
+    const token = bodyToken || (req as AuthenticatedRequest & { cookies: Record<string, string> }).cookies?.refresh_token
 
     if (token) {
       await this.authService.logout(token)
