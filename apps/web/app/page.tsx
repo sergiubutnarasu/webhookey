@@ -22,14 +22,14 @@ export default async function Home() {
   }
 
   const api = createApiClient(token, cookieStore.get("refresh_token")?.value);
-  const channels = await api.getChannels();
+  const { data: channels, total } = await api.getChannels();
 
   return (
     <main className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-semibold tracking-tight">Channels</h1>
-          <Badge variant="secondary">{channels.length}</Badge>
+          <Badge variant="secondary">{total}</Badge>
         </div>
         <Link href="/channels/new" className="inline-flex">
           <Button>New Channel</Button>

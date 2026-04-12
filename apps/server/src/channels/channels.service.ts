@@ -16,11 +16,20 @@ export class ChannelsService {
     private readonly crypto: ICryptoService,
   ) {}
 
-  async findAll(userId: string) {
-    return this.prisma.channel.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-    })
+  async findAll(userId: string, page = 1, limit = 20) {
+    const skip = (page - 1) * limit
+
+    const [data, total] = await Promise.all([
+      this.prisma.channel.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.channel.count({ where: { userId } }),
+    ])
+
+    return { data, total, page, limit }
   }
 
   async findOne(userId: string, id: string) {
