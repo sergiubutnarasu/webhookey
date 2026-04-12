@@ -1,7 +1,7 @@
 import { Command, Args, Flags } from '@oclif/core'
 import { spawn } from 'child_process'
 import { api } from '../lib/api'
-import { getApiUrl, getAccessToken, getRefreshToken, setAccessToken, setRefreshToken, clearTokens } from '../lib/config'
+import { getApiUrl, getAccessToken, getRefreshToken, setAccessToken, setRefreshToken } from '../lib/config'
 
 interface WebhookEvent {
   type?: string
@@ -69,17 +69,30 @@ export default class Listen extends Command {
     let reconnectAttempts = 0
     const maxReconnectAttempts = 10
     const baseReconnectDelay = 1000
+    let generation = 0          // incremented on each new connection; stale handlers check this
+    let isRefreshing = false    // prevents concurrent token refresh calls
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null
 
     const connect = () => {
+      const myGeneration = ++generation
+
+      // Cancel any pending reconnect scheduled by a previous generation
+      if (reconnectTimer !== null) {
+        clearTimeout(reconnectTimer)
+        reconnectTimer = null
+      }
+
       eventSource = new EventSource(`${apiUrl}/hooks/${channel.slug}/events`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
 
       eventSource.onopen = () => {
+        if (myGeneration !== generation) return
         reconnectAttempts = 0
       }
 
       eventSource.onmessage = (event: { data: string }) => {
+        if (myGeneration !== generation) return
         const data = JSON.parse(event.data) as WebhookEvent
 
         if (data.type === 'heartbeat') {
@@ -103,10 +116,14 @@ export default class Listen extends Command {
       }
 
       eventSource.onerror = async (err: unknown) => {
+        if (myGeneration !== generation) return
         const status = (err as { status?: number })?.status
 
         // Only attempt token refresh on 401
         if (status === 401) {
+          if (isRefreshing) return
+          isRefreshing = true
+
           const refresh = await getRefreshToken()
           if (refresh) {
             try {
@@ -121,6 +138,7 @@ export default class Listen extends Command {
                 await setAccessToken(tokens.access_token)
                 await setRefreshToken(tokens.refresh_token)
                 accessToken = tokens.access_token
+                isRefreshing = false
 
                 eventSource?.close()
                 reconnectAttempts = 0
@@ -132,7 +150,7 @@ export default class Listen extends Command {
             }
           }
 
-          await clearTokens()
+          // Tokens remain in keyring — subsequent commands can still attempt refresh
           this.error('Session expired — run webhookey login')
           process.exit(1)
           return
@@ -150,7 +168,7 @@ export default class Listen extends Command {
         const delay = Math.min(baseReconnectDelay * 2 ** reconnectAttempts, 60000)
         reconnectAttempts++
         this.warn(`Connection lost, reconnecting in ${Math.round(delay / 1000)}s (attempt ${reconnectAttempts}/${maxReconnectAttempts})...`)
-        setTimeout(connect, delay)
+        reconnectTimer = setTimeout(connect, delay)
       }
     }
 
@@ -179,6 +197,7 @@ export default class Listen extends Command {
 
     // Handle SIGINT gracefully
     process.on('SIGINT', () => {
+      if (reconnectTimer !== null) clearTimeout(reconnectTimer)
       eventSource?.close()
       if (currentProcess) {
         currentProcess.kill('SIGTERM')
