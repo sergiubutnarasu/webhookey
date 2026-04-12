@@ -110,6 +110,7 @@ export class HooksGateway implements OnModuleInit {
     const subs = this.subscribers.get(slug)
     if (!subs) return
     for (const subject of subs) {
+      subject.next({ type: 'message', data: { type: 'disconnect' } })
       subject.complete()
     }
   }

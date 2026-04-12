@@ -72,6 +72,7 @@ export default class Listen extends Command {
     let generation = 0          // incremented on each new connection; stale handlers check this
     let isRefreshing = false    // prevents concurrent token refresh calls
     let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+    let disconnecting = false
 
     const connect = () => {
       const myGeneration = ++generation
@@ -95,8 +96,11 @@ export default class Listen extends Command {
         if (myGeneration !== generation) return
         const data = JSON.parse(event.data) as WebhookEvent
 
-        if (data.type === 'heartbeat') {
-          return
+        if (data.type === 'disconnect') {
+          disconnecting = true
+          eventSource?.close()
+          this.log('Disconnected by server — all devices removed from channel.')
+          process.exit(0)
         }
 
         if (!data.verified) {
@@ -114,6 +118,8 @@ export default class Listen extends Command {
         queue.push(data.payload)
         processQueue()
       }
+
+
 
       eventSource.onerror = async (err: unknown) => {
         if (myGeneration !== generation) return
@@ -156,8 +162,10 @@ export default class Listen extends Command {
           return
         }
 
+        // Deliberate disconnect — don't retry
+        if (disconnecting) return
+
         // Transient error (connection reset, server restart, network issue)
-        eventSource?.close()
 
         if (reconnectAttempts >= maxReconnectAttempts) {
           this.error('Lost connection to server after multiple retries')
