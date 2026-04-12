@@ -24,7 +24,7 @@ export class ChannelsService {
   }
 
   async findOne(userId: string, id: string) {
-    const channel = await this.prisma.channel.findFirst({
+    return this.prisma.channel.findFirst({
       where: { id, userId },
       include: {
         _count: {
@@ -32,7 +32,6 @@ export class ChannelsService {
         },
       },
     })
-    return channel
   }
 
   async create(userId: string, dto: CreateChannelDto) {
@@ -54,37 +53,18 @@ export class ChannelsService {
     }
   }
 
-  async update(userId: string, id: string, dto: UpdateChannelDto) {
-    // Verify ownership
-    const existing = await this.findOne(userId, id)
-    if (!existing) {
-      return null
-    }
-
+  async update(id: string, dto: UpdateChannelDto) {
     return this.prisma.channel.update({
       where: { id },
       data: dto,
     })
   }
 
-  async remove(userId: string, id: string) {
-    // Verify ownership
-    const existing = await this.findOne(userId, id)
-    if (!existing) {
-      return null
-    }
-
+  async remove(id: string) {
     await this.prisma.channel.delete({ where: { id } })
-    return true
   }
 
-  async findEvents(userId: string, channelId: string, page = 1, limit = 20) {
-    // Verify ownership
-    const channel = await this.findOne(userId, channelId)
-    if (!channel) {
-      return null
-    }
-
+  async findEvents(channelId: string, page = 1, limit = 20) {
     const skip = (page - 1) * limit
 
     const [data, total] = await Promise.all([

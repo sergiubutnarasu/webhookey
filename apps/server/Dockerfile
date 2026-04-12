@@ -11,8 +11,8 @@ COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/yarn.lock ./yarn.lock
 RUN corepack enable && yarn install --frozen-lockfile
 COPY --from=pruner /app/out/full/ .
-RUN yarn turbo build --filter=@webhookey/server
 RUN yarn workspace @webhookey/server exec prisma generate
+RUN yarn turbo build --filter=@webhookey/server
 
 FROM node:22-slim AS runner
 WORKDIR /app

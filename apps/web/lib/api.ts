@@ -1,3 +1,4 @@
+import { ApiError } from "./api-error";
 import { Channel, WebhookEvent, PaginatedResponse } from "@webhookey/types";
 
 const API_URL =
@@ -90,7 +91,7 @@ export function createApiClient(token?: string, refreshToken?: string): ApiClien
       const error: any = await res
         .json()
         .catch(() => ({ message: "Unknown error" }));
-      throw new Error(error.message || error.error || "Request failed");
+      throw new ApiError(error.message || error.error || "Request failed", res.status);
     }
 
     return res.json() as Promise<T>;
