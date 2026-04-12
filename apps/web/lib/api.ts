@@ -127,3 +127,15 @@ export function createApiClient(token?: string, refreshToken?: string): ApiClien
     getMe: () => fetchJson<{ id: string; email: string; name: string }>("/auth/me"),
   };
 }
+
+/**
+ * Get SSE endpoint URL for a channel.
+ * Since EventSource doesn't support custom headers, token is passed via query param.
+ */
+export function getChannelSseUrl(channelId: string, token: string): string {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    process.env.INTERNAL_API_URL ||
+    "http://localhost:3000";
+  return `${baseUrl}/channels/${encodeURIComponent(channelId)}/events?token=${encodeURIComponent(token)}`;
+}

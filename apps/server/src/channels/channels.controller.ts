@@ -10,13 +10,17 @@ import {
   Req,
   UseGuards,
   ConflictException,
+  Sse,
+  MessageEvent,
 } from '@nestjs/common'
+import { Observable } from 'rxjs'
 import { ChannelsService, CreateChannelDto, UpdateChannelDto } from './channels.service'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { ChannelOwnershipGuard } from '../common/guards/channel-ownership.guard'
 import { ConfigService } from '@nestjs/config'
 import { AuthenticatedRequest } from '../common/types/authenticated-request.interface'
 import { HooksGateway } from '../hooks/hooks.gateway'
+import { ChannelsGateway } from './channels.gateway'
 
 @Controller('channels')
 @UseGuards(JwtAuthGuard)
@@ -25,6 +29,7 @@ export class ChannelsController {
     private readonly channelsService: ChannelsService,
     private readonly config: ConfigService,
     private readonly hooksGateway: HooksGateway,
+    private readonly channelsGateway: ChannelsGateway,
   ) {}
 
   @Get()
@@ -117,5 +122,14 @@ export class ChannelsController {
     const parsedLimit = Math.min(100, Math.max(1, parseInt(limit) || 20))
 
     return this.channelsService.findEvents(id, parsedPage, parsedLimit)
+  }
+
+  @Sse(':id/events')
+  @UseGuards(ChannelOwnershipGuard)
+  subscribeToEvents(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ): Observable<MessageEvent> {
+    return this.channelsGateway.subscribe(id, req.user.id)
   }
 }
