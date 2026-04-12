@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
+import { LogoutButton } from "@/components/logout-button";
 export default async function Home() {
   const cookieStore = cookies();
   const token = cookieStore.get("access_token")?.value;
@@ -31,11 +31,15 @@ export default async function Home() {
           <h1 className="text-2xl font-semibold tracking-tight">Channels</h1>
           <Badge variant="secondary">{channels.length}</Badge>
         </div>
-        <Link href="/channels/new" className="inline-flex">
-          <Button>New Channel</Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href="/channels/new" className="inline-flex">
+            <Button>New Channel</Button>
+          </Link>
+          <LogoutButton />
+        </div>
       </div>
 
+      <div className="space-y-4">
       <div className="space-y-4">
         {channels.length === 0 ? (
           <Card className="border-dashed">
