@@ -41,3 +41,7 @@ postgres-data/
 
 # Yarn
 .yarn/
+
+# Git worktrees
+.worktrees/*
+!.worktrees/.gitkeep
