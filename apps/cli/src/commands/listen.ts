@@ -96,6 +96,13 @@ export default class Listen extends Command {
         if (myGeneration !== generation) return
         const data = JSON.parse(event.data) as WebhookEvent
 
+        if (data.type === 'disconnect') {
+          disconnecting = true
+          eventSource?.close()
+          this.log('Disconnected by server — all devices removed from channel.')
+          process.exit(0)
+        }
+
         if (!data.verified) {
           if (!flags['allow-unverified']) {
             this.warn('Received unverified webhook, skipping execution')
@@ -112,13 +119,6 @@ export default class Listen extends Command {
         processQueue()
       }
 
-      eventSource.addEventListener('disconnect', () => {
-        if (myGeneration !== generation) return
-        disconnecting = true
-        eventSource?.close()
-        this.log('Disconnected by server — all devices removed from channel.')
-        process.exit(0)
-      })
 
 
       eventSource.onerror = async (err: unknown) => {
