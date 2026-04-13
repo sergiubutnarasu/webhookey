@@ -12,8 +12,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Pagination } from "@/components/ui/pagination";
 
-export default async function Home() {
+interface SearchParams {
+  page?: string;
+  limit?: string;
+}
+
+interface Props {
+  searchParams?: SearchParams;
+}
+export default async function Home({ searchParams }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("access_token")?.value;
 
@@ -21,8 +30,13 @@ export default async function Home() {
     redirect("/auth/login");
   }
 
+  const page = Math.max(1, parseInt(searchParams?.page || "1"));
+  const limit = Math.min(100, Math.max(1, parseInt(searchParams?.limit || "10")));
+
   const api = createApiClient(token, cookieStore.get("refresh_token")?.value);
-  const { data: channels, total } = await api.getChannels();
+  const { data: channels, total } = await api.getChannels(page, limit);
+
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <main className="p-6 max-w-4xl mx-auto">
@@ -70,6 +84,14 @@ export default async function Home() {
           ))
         )}
       </div>
+
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        totalItems={total}
+        itemsPerPage={limit}
+        baseUrl="/?"
+      />
     </main>
   );
 }

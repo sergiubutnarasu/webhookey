@@ -15,12 +15,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Pagination } from "@/components/ui/pagination";
+
+interface SearchParams {
+  page?: string;
+  limit?: string;
+}
 
 interface Props {
   params: { id: string };
+  searchParams?: SearchParams;
 }
 
-export default async function ChannelPage({ params }: Props) {
+export default async function ChannelPage({ params, searchParams }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("access_token")?.value;
 
@@ -28,13 +35,18 @@ export default async function ChannelPage({ params }: Props) {
     redirect("/auth/login");
   }
 
+  const page = Math.max(1, parseInt(searchParams?.page || "1"));
+  const limit = Math.min(100, Math.max(1, parseInt(searchParams?.limit || "20")));
+
   const api = createApiClient(token, cookieStore.get("refresh_token")?.value);
 
   try {
     const [channel, events] = await Promise.all([
       api.getChannel(params.id),
-      api.getEvents(params.id),
+      api.getEvents(params.id, page, limit),
     ]);
+
+    const totalPages = Math.ceil(events.total / limit);
 
     return (
       <main className="p-6 max-w-4xl mx-auto">
@@ -84,7 +96,7 @@ export default async function ChannelPage({ params }: Props) {
 
         <div className="space-y-4">
           <h2 className="text-lg font-semibold tracking-tight">
-            Events <Badge variant="secondary">{events.data.length}</Badge>
+            Events <Badge variant="secondary">{events.total}</Badge>
           </h2>
 
           <div className="space-y-3">
@@ -122,6 +134,14 @@ export default async function ChannelPage({ params }: Props) {
               ))
             )}
           </div>
+
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            totalItems={events.total}
+            itemsPerPage={limit}
+            baseUrl={`/channels/${params.id}?`}
+          />
         </div>
       </main>
     );
