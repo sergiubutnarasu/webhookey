@@ -40,7 +40,6 @@ export default async function Home() {
       </div>
 
       <div className="space-y-4">
-      <div className="space-y-4">
         {channels.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="p-8 text-center">
