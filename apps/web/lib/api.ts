@@ -25,6 +25,7 @@ export interface ApiClient {
     email: string,
     password: string,
   ): Promise<{ access_token: string; refresh_token: string }>;
+  logout(refreshToken: string): Promise<void>;
   signup(
     email: string,
     password: string,
@@ -115,6 +116,11 @@ export function createApiClient(token?: string, refreshToken?: string): ApiClien
       fetchJson<{ access_token: string; refresh_token: string }>("/auth/login", {
         method: "POST",
         body: JSON.stringify({ email, password }),
+      }),
+    logout: (refreshToken) =>
+      fetchJson<void>("/auth/logout", {
+        method: "POST",
+        body: JSON.stringify({ refreshToken }),
       }),
     signup: (email, password, name) =>
       fetchJson<{ access_token: string; refresh_token: string }>("/auth/signup", {
