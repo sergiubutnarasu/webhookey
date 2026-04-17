@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createApiClient } from "lib/api";
+import { createChannelAction } from "./actions";
 import { createChannelSchema, type CreateChannelFormData } from "lib/schemas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,7 +55,6 @@ export default function NewChannelPage() {
 
   const handleCloseModal = () => {
     if (createdChannel) {
-      router.refresh();
       router.push(`/channels/${createdChannel.id}`);
     }
   };
@@ -68,14 +67,13 @@ export default function NewChannelPage() {
 
   const onSubmit = async (data: CreateChannelFormData) => {
     try {
-      const channel = await createApiClient().createChannel(
+      const channel = await createChannelAction(
         data.name,
         data.generateSecret ?? true,
         data.retentionDays,
       );
 
       if (!channel.secret && channel.id) {
-        router.refresh();
         router.push(`/channels/${channel.id}`);
         return;
       }
