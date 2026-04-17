@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createApiClient } from "lib/api";
+import { createApiClient } from "@/lib/api";
 import { updateProfileSchema, updatePasswordSchema, type UpdateProfileFormData, type UpdatePasswordFormData } from "lib/schemas";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 interface UserProfile {
   id: string;
@@ -24,7 +25,6 @@ export default function ProfilePage() {
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
 
-  // Profile form
   const {
     register: registerProfile,
     handleSubmit: handleSubmitProfile,
@@ -36,7 +36,6 @@ export default function ProfilePage() {
     defaultValues: { name: "" },
   });
 
-  // Password form
   const {
     register: registerPassword,
     handleSubmit: handleSubmitPassword,
@@ -49,14 +48,12 @@ export default function ProfilePage() {
   });
 
   useEffect(() => {
-    // Load user data
     const loadUser = async () => {
       try {
         const userData = await createApiClient().getMe();
         setUser(userData);
         setProfileValue("name", userData.name);
       } catch (e: any) {
-        // Not authenticated, redirect to login
         router.push("/auth/login?returnTo=/auth/profile");
       } finally {
         setLoading(false);
@@ -94,23 +91,19 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-8">
-        <Card className="w-full max-w-md">
-          <CardContent className="py-8 text-center">
-            <p className="text-muted-foreground">Loading...</p>
-          </CardContent>
-        </Card>
-      </main>
+      <Card className="max-w-md">
+        <CardContent className="py-8 text-center">
+          <p className="text-muted-foreground">Loading...</p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-center">Profile Settings</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-8">
+    <div className="max-w-md">
+      <h1 className="text-2xl font-semibold tracking-tight mb-6">Profile Settings</h1>
+      <Card className="shadow-elevated">
+        <CardContent className="p-6 space-y-8">
           {/* Profile Section */}
           <section>
             <h2 className="text-lg font-semibold mb-4">Profile Information</h2>
@@ -157,8 +150,7 @@ export default function ProfilePage() {
             </form>
           </section>
 
-          {/* Divider */}
-          <div className="border-t" />
+          <Separator />
 
           {/* Password Section */}
           <section>
@@ -205,6 +197,6 @@ export default function ProfilePage() {
           </section>
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

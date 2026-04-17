@@ -91,17 +91,17 @@ export default function NewChannelPage() {
   };
 
   return (
-    <main className="p-6 max-w-md mx-auto">
+    <div className="max-w-md">
       <div className="mb-6">
         <Link
           href="/"
-          className="text-sm text-muted-foreground hover:text-foreground transition-pastel"
+          className="text-sm text-muted-foreground hover:text-foreground transition-clean"
         >
-          ← Back to channels
+          &larr; Back to channels
         </Link>
       </div>
 
-      <Card className="shadow-soft">
+      <Card className="shadow-elevated">
         <CardHeader className="p-6">
           <CardTitle className="text-xl font-semibold tracking-tight">
             New Channel
@@ -186,7 +186,7 @@ export default function NewChannelPage() {
             <AlertDialogTitle>Channel Created</AlertDialogTitle>
             <AlertDialogDescription className="space-y-4">
               <p className="text-red-500 font-medium">
-                Save your secret — it won't be shown again!
+                Save your secret &mdash; it won&apos;t be shown again!
               </p>
               <div className="bg-muted p-3 rounded-md font-mono text-sm break-all">
                 {createdChannel?.secret}
@@ -203,6 +203,6 @@ export default function NewChannelPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </main>
+    </div>
   );
 }

@@ -2,8 +2,8 @@ import { cookies } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { LockKeyhole } from "lucide-react";
-import { createApiClient } from "../../../lib/api";
-import { ApiError } from "../../../lib/api-error";
+import { createApiClient } from "@/lib/api";
+import { ApiError } from "@/lib/api-error";
 import { DeleteChannelButton } from "./DeleteChannelButton";
 import { CopyButton } from "./CopyButton";
 import { DisconnectAllButton } from "./DisconnectAllButton";
@@ -49,17 +49,17 @@ export default async function ChannelPage({ params, searchParams }: Props) {
     const totalPages = Math.ceil(events.total / limit);
 
     return (
-      <main className="p-6 max-w-4xl mx-auto">
+      <div>
         <div className="mb-2">
           <Link
             href="/"
-            className="text-sm text-muted-foreground hover:text-foreground transition-pastel"
+            className="text-sm text-muted-foreground hover:text-foreground transition-clean"
           >
-            ← Back to channels
+            &larr; Back to channels
           </Link>
         </div>
 
-        <Card className="mb-6 shadow-soft">
+        <Card className="mb-6 shadow-elevated">
           <CardHeader className="p-6">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
@@ -115,7 +115,7 @@ export default async function ChannelPage({ params, searchParams }: Props) {
               events.data.map((event) => (
                 <Card
                   key={event.id}
-                  className="hover:bg-accent/30 transition-pastel"
+                  className="hover:shadow-card-hover transition-clean"
                 >
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3">
@@ -143,7 +143,7 @@ export default async function ChannelPage({ params, searchParams }: Props) {
             baseUrl={`/channels/${params.id}?`}
           />
         </div>
-      </main>
+      </div>
     );
   } catch (e: any) {
     if (e instanceof ApiError && e.statusCode === 403) {

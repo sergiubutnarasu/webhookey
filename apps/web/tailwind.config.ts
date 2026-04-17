@@ -1,9 +1,5 @@
 import type { Config } from 'tailwindcss'
 
-/**
- * Tailwind configuration for Webhookey with minimalist pastel theme
- * Pastel palette: lavender, mint, peach, powder blue, rose
- */
 const config: Config = {
   darkMode: 'class',
   content: [
@@ -14,7 +10,6 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Pastel palette mapped to semantic colors
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -40,6 +35,8 @@ const config: Config = {
         accent: {
           DEFAULT: 'hsl(var(--accent))',
           foreground: 'hsl(var(--accent-foreground))',
+          indigo: 'hsl(var(--accent-indigo))',
+          'indigo-foreground': 'hsl(var(--accent-indigo-foreground))',
         },
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
@@ -48,14 +45,6 @@ const config: Config = {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
-        // Custom pastel colors for direct use
-        pastel: {
-          lavender: '#E6E6FA',
-          mint: '#F0FFF0',
-          peach: '#FFDAB9',
-          'powder-blue': '#B0E0E6',
-          rose: '#FFE4E1',
-        },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -63,7 +52,6 @@ const config: Config = {
         sm: 'calc(var(--radius) - 4px)',
       },
       boxShadow: {
-        // Soft pastel shadows
         'soft-sm': '0 1px 2px 0 rgb(230 230 250 / 0.1)',
         'soft': '0 1px 3px 0 rgb(230 230 250 / 0.12), 0 1px 2px -1px rgb(230 230 250 / 0.08)',
         'soft-md': '0 4px 6px -1px rgb(230 230 250 / 0.12), 0 2px 4px -2px rgb(230 230 250 / 0.08)',

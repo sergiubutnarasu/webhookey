@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { LockKeyhole } from "lucide-react";
-import { createApiClient } from "../lib/api";
+import { createApiClient } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/ui/pagination";
-import { LogoutButton } from "@/components/logout-button";
 
 interface SearchParams {
   page?: string;
@@ -23,6 +22,7 @@ interface SearchParams {
 interface Props {
   searchParams?: SearchParams;
 }
+
 export default async function Home({ searchParams }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("access_token")?.value;
@@ -40,18 +40,15 @@ export default async function Home({ searchParams }: Props) {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <main className="p-6 max-w-4xl mx-auto">
+    <div>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-semibold tracking-tight">Channels</h1>
           <Badge variant="secondary">{total}</Badge>
         </div>
-        <div className="flex items-center gap-3">
-          <Link href="/channels/new" className="inline-flex">
-            <Button>New Channel</Button>
-          </Link>
-          <LogoutButton />
-        </div>
+        <Link href="/channels/new" className="inline-flex">
+          <Button>New Channel</Button>
+        </Link>
       </div>
 
       <div className="space-y-4">
@@ -71,7 +68,7 @@ export default async function Home({ searchParams }: Props) {
               href={`/channels/${channel.id}`}
               className="block"
             >
-              <Card className="hover:bg-accent/30 transition-pastel cursor-pointer">
+              <Card className="hover:shadow-card-hover transition-clean cursor-pointer">
                 <CardHeader className="p-5">
                   <CardTitle className="text-lg text-foreground flex items-center gap-2">
                     {channel.name}
@@ -96,6 +93,6 @@ export default async function Home({ searchParams }: Props) {
         itemsPerPage={limit}
         baseUrl="/?"
       />
-    </main>
+    </div>
   );
 }

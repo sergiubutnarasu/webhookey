@@ -55,47 +55,45 @@ function ActivateForm() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-center">Activate Device</CardTitle>
-          <CardDescription className="text-center">
-            Enter the device code shown on your CLI to approve it.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {errors.root && (
-            <p className="text-destructive text-sm mb-4 text-center">
-              {errors.root.message}
-            </p>
-          )}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="userCode">Device Code</Label>
-              <Input
-                id="userCode"
-                type="text"
-                placeholder="XXXX-XXXX"
-                className="font-mono uppercase"
-                {...register("userCode", {
-                  onChange: (e) => {
-                    const value = e.target.value.toUpperCase();
-                    e.target.value = value;
-                  },
-                })}
-                aria-invalid={errors.userCode ? "true" : "false"}
-              />
-              {errors.userCode && (
-                <p className="text-destructive text-sm">{errors.userCode.message}</p>
-              )}
-            </div>
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Activating..." : "Activate"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </main>
+    <Card className="shadow-elevated">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-center">Activate Device</CardTitle>
+        <CardDescription className="text-center">
+          Enter the device code shown on your CLI to approve it.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {errors.root && (
+          <p className="text-destructive text-sm mb-4 text-center">
+            {errors.root.message}
+          </p>
+        )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="userCode">Device Code</Label>
+            <Input
+              id="userCode"
+              type="text"
+              placeholder="XXXX-XXXX"
+              className="font-mono uppercase"
+              {...register("userCode", {
+                onChange: (e) => {
+                  const value = e.target.value.toUpperCase();
+                  e.target.value = value;
+                },
+              })}
+              aria-invalid={errors.userCode ? "true" : "false"}
+            />
+            {errors.userCode && (
+              <p className="text-destructive text-sm">{errors.userCode.message}</p>
+            )}
+          </div>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Activating..." : "Activate"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
 
