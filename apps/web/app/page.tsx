@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/ui/pagination";
+import { LogoutButton } from "@/components/logout-button";
 
 interface SearchParams {
   page?: string;
@@ -45,44 +46,49 @@ export default async function Home({ searchParams }: Props) {
           <h1 className="text-2xl font-semibold tracking-tight">Channels</h1>
           <Badge variant="secondary">{total}</Badge>
         </div>
-        <Link href="/channels/new" className="inline-flex">
-          <Button>New Channel</Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href="/channels/new" className="inline-flex">
+            <Button>New Channel</Button>
+          </Link>
+          <LogoutButton />
+        </div>
       </div>
 
       <div className="space-y-4">
-        {channels.length === 0 ? (
-          <Card className="border-dashed">
-            <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">No channels yet.</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Create your first channel to receive webhooks.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          channels.map((channel) => (
-            <Link
-              key={channel.id}
-              href={`/channels/${channel.id}`}
-              className="block"
-            >
-              <Card className="hover:bg-accent/30 transition-pastel cursor-pointer">
-                <CardHeader className="p-5">
-                  <CardTitle className="text-lg text-foreground flex items-center gap-2">
-                    {channel.name}
-                    {channel.hasSecret && (
-                      <LockKeyhole className="h-3 w-3 text-muted-foreground" />
-                    )}
-                  </CardTitle>
-                  <CardDescription className="font-mono text-xs">
-                    {channel.webhookUrl}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
-          ))
-        )}
+        <div className="space-y-4">
+          {channels.length === 0 ? (
+            <Card className="border-dashed">
+              <CardContent className="p-8 text-center">
+                <p className="text-muted-foreground">No channels yet.</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Create your first channel to receive webhooks.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            channels.map((channel) => (
+              <Link
+                key={channel.id}
+                href={`/channels/${channel.id}`}
+                className="block"
+              >
+                <Card className="hover:bg-accent/30 transition-pastel cursor-pointer">
+                  <CardHeader className="p-5">
+                    <CardTitle className="text-lg text-foreground flex items-center gap-2">
+                      {channel.name}
+                      {channel.hasSecret && (
+                        <LockKeyhole className="h-3 w-3 text-muted-foreground" />
+                      )}
+                    </CardTitle>
+                    <CardDescription className="font-mono text-xs">
+                      {channel.webhookUrl}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+            ))
+          )}
+        </div>
       </div>
 
       <Pagination
