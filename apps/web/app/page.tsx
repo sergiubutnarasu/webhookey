@@ -12,8 +12,18 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Pagination } from "@/components/ui/pagination";
 import { LogoutButton } from "@/components/logout-button";
-export default async function Home() {
+
+interface SearchParams {
+  page?: string;
+  limit?: string;
+}
+
+interface Props {
+  searchParams?: SearchParams;
+}
+export default async function Home({ searchParams }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("access_token")?.value;
 
@@ -21,15 +31,20 @@ export default async function Home() {
     redirect("/auth/login");
   }
 
+  const page = Math.max(1, parseInt(searchParams?.page || "1"));
+  const limit = Math.min(100, Math.max(1, parseInt(searchParams?.limit || "10")));
+
   const api = createApiClient(token, cookieStore.get("refresh_token")?.value);
-  const channels = await api.getChannels();
+  const { data: channels, total } = await api.getChannels(page, limit);
+
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <main className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-semibold tracking-tight">Channels</h1>
-          <Badge variant="secondary">{channels.length}</Badge>
+          <Badge variant="secondary">{total}</Badge>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/channels/new" className="inline-flex">
@@ -73,6 +88,14 @@ export default async function Home() {
           ))
         )}
       </div>
+
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        totalItems={total}
+        itemsPerPage={limit}
+        baseUrl="/?"
+      />
     </main>
   );
 }

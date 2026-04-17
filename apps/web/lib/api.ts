@@ -7,7 +7,7 @@ const API_URL =
   "http://localhost:3000";
 
 export interface ApiClient {
-  getChannels(): Promise<Channel[]>;
+  getChannels(page?: number, limit?: number): Promise<PaginatedResponse<Channel>>;
   getChannel(id: string): Promise<Channel>;
   createChannel(
     name: string,
@@ -101,7 +101,7 @@ export function createApiClient(token?: string, refreshToken?: string): ApiClien
   };
 
   return {
-    getChannels: () => fetchJson<Channel[]>("/channels"),
+    getChannels: (page = 1, limit = 20) => fetchJson<PaginatedResponse<Channel>>(`/channels?page=${page}&limit=${limit}`),
     getChannel: (id) => fetchJson<Channel>(`/channels/${id}`),
     createChannel: (name, generateSecret = true, retentionDays) =>
       fetchJson<Channel & { secret: string }>("/channels", {

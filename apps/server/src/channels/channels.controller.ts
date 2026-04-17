@@ -28,19 +28,31 @@ export class ChannelsController {
   ) {}
 
   @Get()
-  async findAll(@Req() req: AuthenticatedRequest) {
-    const channels = await this.channelsService.findAll(req.user.id)
+  async findAll(
+    @Req() req: AuthenticatedRequest,
+    @Query('page') page: string,
+    @Query('limit') limit: string,
+  ) {
+    const parsedPage = Math.max(1, parseInt(page) || 1)
+    const parsedLimit = Math.min(100, Math.max(1, parseInt(limit) || 20))
+
+    const { data: channels, total } = await this.channelsService.findAll(req.user.id, parsedPage, parsedLimit)
     const baseUrl = this.config.getOrThrow<string>('BASE_URL')
-    return channels.map((c: any) => ({
-      id: c.id,
-      slug: c.slug,
-      name: c.name,
-      webhookUrl: `${baseUrl}/hooks/${c.slug}`,
-      retentionDays: c.retentionDays,
-      hasSecret: !!c.encryptedSecret,
-      createdAt: c.createdAt,
-      connectedDevices: this.hooksGateway.getSubscriberCount(c.slug),
-    }))
+    return {
+      data: channels.map((c: any) => ({
+        id: c.id,
+        slug: c.slug,
+        name: c.name,
+        webhookUrl: `${baseUrl}/hooks/${c.slug}`,
+        retentionDays: c.retentionDays,
+        hasSecret: !!c.encryptedSecret,
+        createdAt: c.createdAt,
+        connectedDevices: this.hooksGateway.getSubscriberCount(c.slug),
+      })),
+      total,
+      page: parsedPage,
+      limit: parsedLimit,
+    }
   }
 
   @Get(':id')
