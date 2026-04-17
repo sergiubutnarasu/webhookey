@@ -115,7 +115,7 @@ export default function ProfilePage() {
           <section>
             <h2 className="text-lg font-semibold mb-4">Profile Information</h2>
             {profileSuccess && (
-              <div className="mb-4 p-3 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-md text-sm">
+              <div className="mb-4 p-3 bg-green-500 dark:bg-green-500 text-green-900 dark:text-green-900 rounded-md text-sm">
                 Profile updated successfully!
               </div>
             )}

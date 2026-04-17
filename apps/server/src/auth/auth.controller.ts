@@ -154,6 +154,7 @@ export class AuthController {
   }
 
   @Patch('me')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async updateProfile(
     @Req() req: AuthenticatedRequest,
