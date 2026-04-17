@@ -208,6 +208,46 @@ export class AuthService {
     })
   }
 
+  /**
+   * Update user profile information
+   * Single Responsibility: handles only profile updates
+   */
+  async updateProfile(userId: string, name: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { name },
+      select: { id: true, email: true, name: true },
+    })
+  }
+
+  /**
+   * Update user password with current password verification
+   * Security: requires current password to prevent unauthorized changes
+   */
+  async updatePassword(userId: string, currentPassword: string, newPassword: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { passwordHash: true },
+    })
+
+    if (!user) {
+      return false
+    }
+
+    const valid = await bcrypt.compare(currentPassword, user.passwordHash)
+    if (!valid) {
+      return false
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10)
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: newPasswordHash },
+    })
+
+    return true
+  }
+
   private async issueTokens(
     userId: string,
     email: string,

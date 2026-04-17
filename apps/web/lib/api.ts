@@ -33,6 +33,8 @@ export interface ApiClient {
   ): Promise<{ access_token: string; refresh_token: string }>;
   activateDevice(userCode: string): Promise<{ approved: boolean }>;
   getMe(): Promise<{ id: string; email: string; name: string }>;
+  updateProfile(name: string): Promise<{ id: string; email: string; name: string }>;
+  updatePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean }>;
 }
 
 export function createApiClient(token?: string, refreshToken?: string): ApiClient {
@@ -115,6 +117,11 @@ export function createApiClient(token?: string, refreshToken?: string): ApiClien
         method: "POST",
         body: JSON.stringify({ email, password }),
       }),
+    logout: (refreshToken) =>
+      fetchJson<void>("/auth/logout", {
+        method: "POST",
+        body: JSON.stringify({ refreshToken }),
+      }),
     signup: (email, password, name) =>
       fetchJson<{ access_token: string; refresh_token: string }>("/auth/signup", {
         method: "POST",
@@ -126,10 +133,15 @@ export function createApiClient(token?: string, refreshToken?: string): ApiClien
         body: JSON.stringify({ user_code: userCode }),
       }),
     getMe: () => fetchJson<{ id: string; email: string; name: string }>("/auth/me"),
-    logout: (refreshToken: string) =>
-      fetchJson<void>("/auth/logout", {
-        method: "POST",
-        body: JSON.stringify({ refreshToken }),
+    updateProfile: (name) =>
+      fetchJson<{ id: string; email: string; name: string }>("/auth/me", {
+        method: "PATCH",
+        body: JSON.stringify({ name }),
+      }),
+    updatePassword: (currentPassword, newPassword) =>
+      fetchJson<{ success: boolean }>("/auth/password", {
+        method: "PATCH",
+        body: JSON.stringify({ currentPassword, newPassword }),
       }),
   };
 }

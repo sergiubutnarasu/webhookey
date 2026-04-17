@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Get,
+  Patch,
   Body,
   Res,
   UseGuards,
@@ -17,6 +18,8 @@ import { JwtAuthGuard } from './jwt-auth.guard'
 import { SignupDto } from './dto/signup.dto'
 import { LoginDto } from './dto/login.dto'
 import { ActivateDto } from './dto/activate.dto'
+import { UpdateProfileDto } from './dto/update-profile.dto'
+import { UpdatePasswordDto } from './dto/update-password.dto'
 import { AuthenticatedRequest } from '../common/types/authenticated-request.interface'
 
 @Controller('auth')
@@ -148,6 +151,39 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   async me(@Req() req: AuthenticatedRequest) {
     return this.authService.getMe(req.user.id)
+  }
+
+  @Patch('me')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async updateProfile(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    return this.authService.updateProfile(req.user.id, dto.name)
+  }
+
+  @Patch('password')
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ login: {} })
+  @HttpCode(HttpStatus.OK)
+  async updatePassword(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: UpdatePasswordDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const success = await this.authService.updatePassword(
+      req.user.id,
+      dto.currentPassword,
+      dto.newPassword,
+    )
+
+    if (!success) {
+      res.status(400).json({ error: 'Current password is incorrect' })
+      return
+    }
+
+    return { success: true }
   }
 
   private parseDurationMs(duration: string): number {
