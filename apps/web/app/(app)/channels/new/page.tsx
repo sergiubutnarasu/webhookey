@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -11,13 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -91,91 +83,75 @@ export default function NewChannelPage() {
   };
 
   return (
-    <div className="max-w-md">
-      <div className="mb-6">
-        <Link
-          href="/"
-          className="text-sm text-muted-foreground hover:text-foreground transition-clean"
-        >
-          &larr; Back to channels
-        </Link>
+    <div className="max-w-lg">
+      <h1 className="text-2xl font-semibold tracking-[-0.5px] text-[#f7f8f8] mb-1">New Channel</h1>
+      <p className="text-sm text-[#8a8f98] mb-8">Create a webhook endpoint to receive events.</p>
+
+      <div className="space-y-6">
+        {errors.root && (
+          <p className="text-sm text-[#ef4444]">
+            {errors.root.message}
+          </p>
+        )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-[13px] font-medium text-[#d0d6e0]">Name</Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="My Channel"
+              {...register("name")}
+              aria-invalid={errors.name ? "true" : "false"}
+            />
+            {errors.name && (
+              <p className="text-sm text-[#ef4444]">
+                {errors.name.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="retentionDays" className="text-[13px] font-medium text-[#d0d6e0]">Retention days (optional)</Label>
+            <Input
+              id="retentionDays"
+              type="number"
+              placeholder="Leave empty for no expiration"
+              {...register("retentionDays", {
+                setValueAs: (v: string) =>
+                  v === "" ? undefined : Number(v),
+              })}
+              aria-invalid={errors.retentionDays ? "true" : "false"}
+            />
+            {errors.retentionDays && (
+              <p className="text-sm text-[#ef4444]">
+                {errors.retentionDays.message}
+              </p>
+            )}
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="disableSecret"
+              checked={disableSecret}
+              onCheckedChange={(checked) => {
+                register("generateSecret").onChange({
+                  target: { name: "generateSecret", value: !checked },
+                });
+              }}
+            />
+            <Label
+              htmlFor="disableSecret"
+              className="text-sm font-normal text-[#8a8f98] cursor-pointer"
+            >
+              Disable secret generation
+            </Label>
+          </div>
+
+          <Button type="submit" className="w-full bg-[#6366f1] hover:bg-[#4f46e5] text-white h-9 text-sm" disabled={isSubmitting}>
+            {isSubmitting ? "Creating..." : "Create Channel"}
+          </Button>
+        </form>
       </div>
-
-      <Card className="shadow-elevated">
-        <CardHeader className="p-6">
-          <CardTitle className="text-xl font-semibold tracking-tight">
-            New Channel
-          </CardTitle>
-          <CardDescription>
-            Create a new webhook channel to receive events.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-6 pb-6">
-          {errors.root && (
-            <p className="text-sm text-destructive mb-4">
-              {errors.root.message}
-            </p>
-          )}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="My Channel"
-                {...register("name")}
-                aria-invalid={errors.name ? "true" : "false"}
-              />
-              {errors.name && (
-                <p className="text-sm text-destructive">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="retentionDays">Retention days (optional)</Label>
-              <Input
-                id="retentionDays"
-                type="number"
-                placeholder="Leave empty for no expiration"
-                {...register("retentionDays", {
-                  setValueAs: (v: string) =>
-                    v === "" ? undefined : Number(v),
-                })}
-                aria-invalid={errors.retentionDays ? "true" : "false"}
-              />
-              {errors.retentionDays && (
-                <p className="text-sm text-destructive">
-                  {errors.retentionDays.message}
-                </p>
-              )}
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="disableSecret"
-                checked={disableSecret}
-                onCheckedChange={(checked) => {
-                  register("generateSecret").onChange({
-                    target: { name: "generateSecret", value: !checked },
-                  });
-                }}
-              />
-              <Label
-                htmlFor="disableSecret"
-                className="text-sm font-normal cursor-pointer"
-              >
-                Disable secret generation
-              </Label>
-            </div>
-
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Channel"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
 
       <AlertDialog
         open={!!createdChannel?.secret}
@@ -185,10 +161,10 @@ export default function NewChannelPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Channel Created</AlertDialogTitle>
             <AlertDialogDescription className="space-y-4">
-              <p className="text-red-500 font-medium">
+              <p className="text-[#ef4444] font-medium">
                 Save your secret &mdash; it won&apos;t be shown again!
               </p>
-              <div className="bg-muted p-3 rounded-md font-mono text-sm break-all">
+              <div className="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] p-3 rounded-md font-mono text-sm break-all text-[#f7f8f8]">
                 {createdChannel?.secret}
               </div>
             </AlertDialogDescription>

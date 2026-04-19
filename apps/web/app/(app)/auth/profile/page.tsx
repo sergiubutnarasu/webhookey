@@ -6,11 +6,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createApiClient } from "@/lib/api";
 import { updateProfileSchema, updatePasswordSchema, type UpdateProfileFormData, type UpdatePasswordFormData } from "lib/schemas";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 
 interface UserProfile {
   id: string;
@@ -91,112 +89,105 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <Card className="max-w-md">
-        <CardContent className="py-8 text-center">
-          <p className="text-muted-foreground">Loading...</p>
-        </CardContent>
-      </Card>
+      <div className="max-w-lg">
+        <p className="text-[#8a8f98] text-sm">Loading...</p>
+      </div>
     );
   }
 
   return (
-    <div className="max-w-md">
-      <h1 className="text-2xl font-semibold tracking-tight mb-6">Profile Settings</h1>
-      <Card className="shadow-elevated">
-        <CardContent className="p-6 space-y-8">
-          {/* Profile Section */}
-          <section>
-            <h2 className="text-lg font-semibold mb-4">Profile Information</h2>
-            {profileSuccess && (
-              <div className="mb-4 p-3 bg-green-500 dark:bg-green-500 text-green-900 dark:text-green-900 rounded-md text-sm">
-                Profile updated successfully!
-              </div>
-            )}
-            {profileErrors.root && (
-              <p className="text-destructive text-sm mb-4 text-center">
-                {profileErrors.root.message}
-              </p>
-            )}
-            <form onSubmit={handleSubmitProfile(onSubmitProfile)} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={user?.email || ""}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Email cannot be changed
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Your name"
-                  {...registerProfile("name")}
-                  aria-invalid={profileErrors.name ? "true" : "false"}
-                />
-                {profileErrors.name && (
-                  <p className="text-destructive text-sm">{profileErrors.name.message}</p>
-                )}
-              </div>
-              <Button type="submit" className="w-full" disabled={isProfileSubmitting}>
-                {isProfileSubmitting ? "Saving..." : "Save Changes"}
-              </Button>
-            </form>
-          </section>
+    <div className="max-w-lg">
+      <h1 className="text-2xl font-semibold tracking-[-0.5px] text-[#f7f8f8] mb-8">Profile</h1>
 
-          <Separator />
+      {/* Profile card */}
+      <div className="bg-[#101111] border border-[rgba(255,255,255,0.08)] rounded-lg p-6 mb-6">
+        <h2 className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#6a6b6c] mb-4">Profile Information</h2>
+        {profileSuccess && (
+          <div className="mb-4 p-3 bg-[rgba(16,185,129,0.15)] text-[#3ecf8e] rounded-md text-sm">
+            Profile updated successfully!
+          </div>
+        )}
+        {profileErrors.root && (
+          <p className="text-sm text-[#ef4444] mb-4">
+            {profileErrors.root.message}
+          </p>
+        )}
+        <form onSubmit={handleSubmitProfile(onSubmitProfile)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-[13px] font-medium text-[#d0d6e0]">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={user?.email || ""}
+              disabled
+              className="bg-[rgba(255,255,255,0.03)]"
+            />
+            <p className="text-xs text-[#6a6b6c]">
+              Email cannot be changed
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-[13px] font-medium text-[#d0d6e0]">Name</Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="Your name"
+              {...registerProfile("name")}
+              aria-invalid={profileErrors.name ? "true" : "false"}
+            />
+            {profileErrors.name && (
+              <p className="text-sm text-[#ef4444]">{profileErrors.name.message}</p>
+            )}
+          </div>
+          <Button type="submit" className="w-full bg-[#6366f1] hover:bg-[#4f46e5] text-white h-9 text-sm" disabled={isProfileSubmitting}>
+            {isProfileSubmitting ? "Saving..." : "Save Changes"}
+          </Button>
+        </form>
+      </div>
 
-          {/* Password Section */}
-          <section>
-            <h2 className="text-lg font-semibold mb-4">Change Password</h2>
-            {passwordSuccess && (
-              <div className="mb-4 p-3 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-md text-sm">
-                Password updated successfully!
-              </div>
+      {/* Password card */}
+      <div className="bg-[#101111] border border-[rgba(255,255,255,0.08)] rounded-lg p-6">
+        <h2 className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#6a6b6c] mb-4">Password</h2>
+        {passwordSuccess && (
+          <div className="mb-4 p-3 bg-[rgba(16,185,129,0.15)] text-[#3ecf8e] rounded-md text-sm">
+            Password updated successfully!
+          </div>
+        )}
+        {passwordErrors.root && (
+          <p className="text-sm text-[#ef4444] mb-4">
+            {passwordErrors.root.message}
+          </p>
+        )}
+        <form onSubmit={handleSubmitPassword(onSubmitPassword)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="currentPassword" className="text-[13px] font-medium text-[#d0d6e0]">Current Password</Label>
+            <Input
+              id="currentPassword"
+              type="password"
+              {...registerPassword("currentPassword")}
+              aria-invalid={passwordErrors.currentPassword ? "true" : "false"}
+            />
+            {passwordErrors.currentPassword && (
+              <p className="text-sm text-[#ef4444]">{passwordErrors.currentPassword.message}</p>
             )}
-            {passwordErrors.root && (
-              <p className="text-destructive text-sm mb-4 text-center">
-                {passwordErrors.root.message}
-              </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="newPassword" className="text-[13px] font-medium text-[#d0d6e0]">New Password</Label>
+            <Input
+              id="newPassword"
+              type="password"
+              {...registerPassword("newPassword")}
+              aria-invalid={passwordErrors.newPassword ? "true" : "false"}
+            />
+            {passwordErrors.newPassword && (
+              <p className="text-sm text-[#ef4444]">{passwordErrors.newPassword.message}</p>
             )}
-            <form onSubmit={handleSubmitPassword(onSubmitPassword)} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
-                <Input
-                  id="currentPassword"
-                  type="password"
-                  {...registerPassword("currentPassword")}
-                  aria-invalid={passwordErrors.currentPassword ? "true" : "false"}
-                />
-                {passwordErrors.currentPassword && (
-                  <p className="text-destructive text-sm">{passwordErrors.currentPassword.message}</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  {...registerPassword("newPassword")}
-                  aria-invalid={passwordErrors.newPassword ? "true" : "false"}
-                />
-                {passwordErrors.newPassword && (
-                  <p className="text-destructive text-sm">{passwordErrors.newPassword.message}</p>
-                )}
-              </div>
-              <Button type="submit" className="w-full" disabled={isPasswordSubmitting}>
-                {isPasswordSubmitting ? "Updating..." : "Update Password"}
-              </Button>
-            </form>
-          </section>
-        </CardContent>
-      </Card>
+          </div>
+          <Button type="submit" className="w-full bg-[#6366f1] hover:bg-[#4f46e5] text-white h-9 text-sm" disabled={isPasswordSubmitting}>
+            {isPasswordSubmitting ? "Updating..." : "Update Password"}
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }

@@ -22,5 +22,6 @@
   "devDependencies": {
     "reflect-metadata": "^0.2.2",
     "turbo": "^2.0.0"
-  }
+  },
+  "dependencies": {}
 }

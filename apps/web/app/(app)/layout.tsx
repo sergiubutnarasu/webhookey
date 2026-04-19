@@ -12,9 +12,9 @@ export default function AppLayout({
       <AppSidebar />
 
       {/* Mobile top bar */}
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:hidden">
+      <header className="sticky top-0 z-30 flex h-12 items-center gap-4 border-b border-[rgba(255,255,255,0.05)] bg-[#08090a]/95 backdrop-blur px-4 md:hidden">
         <MobileNav />
-        <span className="text-lg font-semibold tracking-tight">Webhookey</span>
+        <span className="text-sm font-semibold tracking-tight text-[#f7f8f8]">Webhookey</span>
       </header>
 
       {/* Main content area */}

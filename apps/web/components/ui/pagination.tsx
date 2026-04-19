@@ -32,8 +32,8 @@ export function Pagination({
   };
 
   return (
-    <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
-      <div className="text-sm text-muted-foreground">
+    <div className="flex items-center justify-between mt-6 pt-4 border-t border-[rgba(255,255,255,0.05)]">
+      <div className="text-sm text-[#8a8f98]">
         Showing {startItem}-{endItem} of {totalItems} items
       </div>
 
