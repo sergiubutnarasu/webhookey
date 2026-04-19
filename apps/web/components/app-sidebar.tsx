@@ -20,7 +20,7 @@ export function AppSidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-60 border-r glass-sidebar flex flex-col">
+     <aside className="fixed left-0 top-0 z-40 h-screen w-60 border-r glass-sidebar hidden md:flex flex-col">
       {/* Branding */}
       <div className="flex h-14 items-center gap-2.5 px-5 border-b">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-indigo">
