@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createApiClient } from '../../../lib/api'
+import { createApiClient } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import {
   AlertDialog,
@@ -18,54 +18,45 @@ import {
 
 interface Props {
   id: string
-  name: string
 }
 
-export function DeleteChannelButton({ id, name }: Props) {
+export function DisconnectAllButton({ id }: Props) {
   const router = useRouter()
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
 
-  const handleDelete = async () => {
-    setIsDeleting(true)
+  const handleDisconnect = async () => {
+    setIsLoading(true)
     try {
       const api = createApiClient()
-      await api.deleteChannel(id)
+      await api.disconnectAll(id)
       setIsOpen(false)
-      router.push('/')
       router.refresh()
     } catch (e: any) {
-      alert(e.message || 'Failed to delete channel')
-      setIsDeleting(false)
+      alert(e.message || 'Failed to disconnect devices')
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm">
-          Delete
+        <Button variant="outline" size="sm">
+          Disconnect all
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete Channel?</AlertDialogTitle>
+          <AlertDialogTitle>Disconnect all devices?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete the channel &quot;{name}&quot; and all its events.
-            This action cannot be undone.
+            This will close all active SSE connections to this channel. Devices will need to reconnect.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={(e) => {
-              e.preventDefault()
-              handleDelete()
-            }}
-            disabled={isDeleting}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            {isDeleting ? 'Deleting...' : 'Delete'}
+          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDisconnect} disabled={isLoading}>
+            {isLoading ? 'Disconnecting…' : 'Disconnect all'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
